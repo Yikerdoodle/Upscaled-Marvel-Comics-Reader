@@ -1,0 +1,11 @@
+# Python virtual environment used by convert.py - large and fully
+# regeneratable (pip install -r requirements / see README for setup steps).
+venv/
+
+# Magpie's own runtime state - shader compile cache and rolling log file.
+# Ephemeral, regenerated automatically on each run.
+Magpie/cache/
+Magpie/logs/
+
+__pycache__/
+*.pyc
