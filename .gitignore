@@ -7,9 +7,11 @@ venv/
 Magpie/cache/
 Magpie/logs/
 
-# Transient debug output from the PowerShell scripts in 4K-TV-Setup/ -
-# regenerated fresh on every run, meaningless once stale.
+# Transient debug output from the PowerShell scripts in 4K-TV-Setup/ and
+# tools/ - regenerated fresh on every run, meaningless once stale.
 4K-TV-Setup/*.log
+tools/*.log
+tools/.tv-infra-status.json
 
 __pycache__/
 *.pyc

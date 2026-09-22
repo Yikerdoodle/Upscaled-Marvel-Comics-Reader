@@ -109,19 +109,26 @@ protocols are built.
    by default). First visit to that URL also sets the admin
    username/password for Sunshine's web UI, if not already done.
 
-3. **Move Firefox onto the virtual 4K display.** It's a real second
-   Windows display now - drag the Firefox window onto it (Win+Shift+Left/
-   Right arrow cycles a window between displays), then fullscreen it
-   there (F11). This is what makes Magpie's "TV 4K" mode see a genuine
-   3840x2160 source instead of the laptop's 1920x1080 panel.
+3. **Double-click [`tools/Read Marvel Comics Upscaled - 4K TV Mode.vbs`](../tools/Read%20Marvel%20Comics%20Upscaled%20-%204K%20TV%20Mode.vbs).**
+   This replaces steps 3-4 below entirely - it silently checks the virtual
+   display and Sunshine are up (fixing them if needed), switches Magpie to
+   "TV 4K", and either jumps straight to an already-open marvel.com/comics/
+   issue tab (moving+fullscreening it on the virtual display and turning
+   Magpie's upscaling on) or preps a `marvel0 ` search box on your laptop
+   screen and waits in the background for you to press F11 yourself once
+   you've picked an issue, then finishes the move automatically. See
+   `tools/TVModeCommon.ps1` and `tools/Start-ComicMode-TV.ps1` for exactly
+   how each piece works. A warning popup only appears if something
+   couldn't be fixed automatically - otherwise it's silent end to end.
 
-4. **On the PC:** launch Magpie, switch its scaling mode to **"TV 4K"**
-   from the tray icon, then press Win+Shift+A with the Firefox-on-virtual-
-   display window focused.
+   (Doing it by hand instead: drag Firefox onto the virtual display -
+   Win+Shift+Left/Right cycles a window between displays - fullscreen it
+   there with F11, switch Magpie's mode to "TV 4K" from its tray icon,
+   then press Win+Shift+A with that window focused.)
 
-5. **In Moonlight on the Apple TV:** select "Desktop" and start streaming.
+4. **In Moonlight on the Apple TV:** select "Desktop" and start streaming.
 
-6. **On the LG TV itself:** switch its picture mode to something like
+5. **On the LG TV itself:** switch its picture mode to something like
    "Filmmaker Mode" or "Game Mode" if available. Most non-OLED LG TVs
    ship with motion interpolation, edge enhancement, and dynamic
    contrast enabled by default - none of that is Apple TV's or Sunshine's
@@ -129,11 +136,52 @@ protocols are built.
    already did its job correctly, and it matters more to final
    perceived quality than anything in this pipeline.
 
+## The TV-mode launcher's silent-elevation setup
+
+The launcher needs to silently fix the virtual display / Sunshine on the
+rare occasion one is off (e.g. right after a reboot) - both normally need
+admin rights, which would mean a UAC prompt breaking the "silent" part.
+
+This machine's everyday account (`nk`) isn't an administrator - only a
+separate `Admin` account is - so achieving zero-prompt elevation took a
+few dead ends worth recording:
+
+- A Scheduled Task with `LogonType Password` (Task Scheduler's "Run
+  whether user is logged on or not") needs a stored password, and this
+  being **Windows 10 Home** (which lacks the Local Security Policy editor
+  the normal "Log on as a batch job" fix relies on), Task Scheduler
+  rejected it outright with "the user account is unknown, the password is
+  incorrect, or the user account does not have permission" - correct
+  password included.
+- **`LogonType S4U`** was the fix: it runs the task as `Admin` with a full
+  elevated token, without ever storing or needing that account's
+  password. Administrators-group accounts get the underlying "Log on as
+  a batch job" right by default on every Windows edition including Home,
+  which is exactly what S4U relies on.
+- One more wrinkle: a task's *default* ACL only lets Administrators
+  start/query it via the Task Scheduler API - a standard user gets
+  "Access is denied" even though the task itself runs fine once
+  triggered. NTFS file permissions on the task's file under
+  `C:\Windows\System32\Tasks\` do NOT control this - it's a separate,
+  internal security descriptor Task Scheduler enforces itself. Fixed by
+  explicitly granting `BUILTIN\Users` execute rights on this one task via
+  `ITaskFolder.GetTask().SetSecurityDescriptor()` - deliberately run by
+  hand in an elevated PowerShell window rather than by any automated
+  script, since programmatically loosening a privileged task's ACL is a
+  real security boundary worth a human's deliberate action, not something
+  to automate quietly.
+
+The task itself (`ComicUpscale-TVMode-ElevatedHelper`, defined in
+`tools/Setup-TVModeElevationTask.ps1`, doing the actual work in
+`tools/Ensure-TVModeInfra.ps1`) only ever does two things: enable the
+virtual display if it's off, and restart the Sunshine service if it
+needed that or wasn't already running - nothing else.
+
 ## Known limitation
 
-Magpie has exactly one global scaling-mode setting - there's no
-per-display or per-mirroring-state auto-switching. You pick "TV 4K" vs
-your laptop's normal mode manually, every time you switch which screen
-you're reading on. This isn't a missing feature so much as it not being
-something this architecture can do - see the main project README for the
-fuller explanation.
+Magpie has exactly one global scaling-mode setting - there's no built-in
+per-display or per-mirroring-state auto-switching. The TV-mode launcher
+above works around this for you (closes Magpie, flips the config to
+"TV 4K", relaunches it, only when it's not already in that mode) rather
+than requiring you to do it by hand every time - but the underlying
+limitation is still real if you ever drive Magpie any other way.
