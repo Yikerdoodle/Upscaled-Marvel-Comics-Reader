@@ -32,7 +32,7 @@ try {
     if ($vdd.Status -ne 'OK') {
         pnputil /enable-device $vdd.InstanceId | Out-Null
         $status.vddWasEnabled = $true
-        $deadline = (Get-Date).AddSeconds(15)
+        $deadline = (Get-Date).AddSeconds(25)
         do {
             Start-Sleep -Milliseconds 500
             $vdd = Get-PnpDevice -InstanceId $vdd.InstanceId
@@ -53,7 +53,13 @@ try {
         Start-Service SunshineService
         $status.sunshineWasRestarted = $true
 
-        $deadline = (Get-Date).AddSeconds(20)
+        # Generous on purpose - a cold-boot scenario (this whole thing
+        # tends to get triggered right after a reboot, since that's when
+        # the virtual display / Sunshine are actually likely to be off)
+        # means competing with the rest of Windows' own startup, and
+        # Sunshine's own NVENC capability probing alone has been observed
+        # taking 15-20+ seconds even on a warm start.
+        $deadline = (Get-Date).AddSeconds(75)
         $up = $false
         do {
             Start-Sleep -Milliseconds 500

@@ -56,7 +56,11 @@ if (-not (Test-InfraReady)) {
         exit 1
     }
 
-    $deadline = (Get-Date).AddSeconds(30)
+    # Generous - Ensure-TVModeInfra.ps1's own internal wait for Sunshine
+    # alone can take up to 75s (its normal startup time, confirmed from its
+    # own log, not just a cold-boot thing), plus Scheduled Task launch
+    # overhead on top of that.
+    $deadline = (Get-Date).AddSeconds(95)
     while (-not (Test-Path $statusPath) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500 }
 
     if (-not (Test-Path $statusPath)) {
@@ -64,7 +68,17 @@ if (-not (Test-InfraReady)) {
         exit 1
     }
     $result = Get-Content $statusPath -Raw | ConvertFrom-Json
+
+    # Belt-and-suspenders: even if the elevated helper's own patience ran
+    # out, Sunshine might have finished binding the port moments later -
+    # give it one more short grace window before treating this as a real
+    # failure.
     if (-not $result.success -or -not (Test-InfraReady)) {
+        $graceDeadline = (Get-Date).AddSeconds(20)
+        while (-not (Test-InfraReady) -and (Get-Date) -lt $graceDeadline) { Start-Sleep -Milliseconds 500 }
+    }
+
+    if (-not (Test-InfraReady)) {
         Show-TvModeWarning "Couldn't get the virtual TV display and Sunshine both ready: $($result.error)`n`nCheck 4K-TV-Setup/README.md."
         exit 1
     }
