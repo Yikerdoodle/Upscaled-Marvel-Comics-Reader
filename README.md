@@ -1,87 +1,136 @@
 # Marvel Unlimited high-fidelity reading
 
-Everything lives on this drive (E:). Nothing on C: except a 4 KB Magpie
-settings file that the app insists on keeping in AppData.
+Everything lives on this drive (E:), including Magpie itself - see
+"Where the live config actually lives" below for the one exception.
 
 ## Start reading
 
-    E:\ComicUpscale\tools\START-COMIC-MODE.bat
+    E:\ComicUpscale\tools\START-COMIC-MODE.vbs
 
-Then: Firefox FULLSCREEN (F11) -> click Firefox -> Win+Shift+A.
+Double-click it. Nothing visible pops up - no console window, no Magpie
+window, nothing in the taskbar. Magpie's tray icon still appears near the
+clock as usual; right-click it for Settings or Exit.
 
-Press the hotkey again to toggle off, so you can compare.
+Then: Firefox **fullscreen** (F11) -> click the Firefox window ->
+**Win+Shift+A** to toggle upscaling on/off, so you can compare.
 
-## The pipeline
+(`START-COMIC-MODE.bat` still exists and does the same launch, but shows
+a console window with instructions text. The .vbs is silent.)
 
-    Firefox fullscreen      1920x1080 captured
-      -> APISR 2x (AI)      3840x2160
-      -> Lanczos fit        1920x1080   (supersampled)
+## The pipeline - shader chain, not an ONNX model
 
-Fullscreen is deliberate. Magpie captures the RENDERED WINDOW, so shrinking
-Firefox would throw away Marvel's real pixels before the model ever sees
-them. Shrinking only helps when the source is smaller than the area it is
-drawn into - which is not the case here.
+The active approach is a chain of Magpie's built-in real-time shaders,
+**not** the ONNX model this project started with. The GAN-trained APISR
+model (still present in `Magpie/`) produced visible halo/ringing artifacts
+on Marvel's already-clean remastered line art - it's built to *add*
+contrast, which shows up as a bright rim around ink lines. Rejected on
+sight; not used in the current recipe.
+
+Current chain ("AntiJaggy 8x Clean" - see
+`magpie-scaling-modes-snapshot.json` for the exact JSON):
+
+    Firefox fullscreen (1920x1080 captured)
+      -> Denoise (Anime4K Bilateral Mode, intensitySigma 0.12-0.16)
+      -> Restore (Anime4K_Restore_Soft_UL - largest non-GAN line-restore
+                   network Magpie ships)
+      -> Upscale 2x (Anime4K_Upscale_UL) -> SMAA_Ultra
+      -> Upscale 2x (Anime4K_Upscale_UL) -> SMAA_Ultra
+      -> Lanczos 2x (explicit scale, cheap final step)
+      = 8x total supersample -> 15360x8640 -> fit back to 1920x1080
+
+Fullscreen is deliberate. Magpie captures the *rendered window*, so
+shrinking Firefox would throw away Marvel's real pixels before any shader
+sees them - the opposite of what an early version of this project did.
+
+Why 8x and not more: Direct3D 11 caps a single texture at 16384px per
+side. 1920 * 8.53 = 16384 exactly, so **8.5x is the hard mathematical
+ceiling for this screen, on any GPU** - not a VRAM limit, a fixed API
+limit. Confirmed by actually hitting it: a 10x attempt (19200px wide)
+failed instantly with `CreateTexture2D` HRESULT 0x80070057 ("parameter is
+incorrect"), logged in `Magpie/logs/`. 8.5x runs with only ~64px of
+margin under that wall - a real but calculated risk taken once, on
+request; 8x (15360px, ~1000px of margin) is the safer default.
+
+Why this over more resolution or a bigger model: two specific defects
+kept surfacing on close, parallel thin lines (crosshatching, shading) -
+denoise merging them into one blob, and FXAA smearing fine repeated
+texture. Both are why denoise is deliberately weak and FXAA is absent
+from the chain, even though both would normally be "quality" settings to
+turn up.
 
 ## Layout
 
     E:\ComicUpscale\
-      Magpie\            the app; model.json and the .onnx files live here
-      tools\             START-COMIC-MODE.bat, Set-ReaderWindow.ps1, probes
-      models\            source .pth weights
-      out\               converted .onnx (fp32 + fp16)
-      venv\              python env for conversions
-      convert.py         .pth -> Magpie-ready .onnx
+      Magpie\                     the app (onnx-preview2 build)
+        effects\                    bundled HLSL shaders (SMAA, Anime4K, ...)
+        *.onnx, model.json.*        both currently INACTIVE - see below
+      tools\                       launchers + diagnostic probes
+      models\                      source .pth weights (for convert.py)
+      out\                         converted .onnx (fp32 + fp16)
+      vector-test\, skeleton-test\  offline vectorization experiments
+      venv\                        python env for convert.py (gitignored)
+      convert.py, verify_chain.py
+      magpie-scaling-modes-snapshot.json   copy of the live config - see below
 
-## Current model
+## Where the live config actually lives
+
+Every scaling mode (all the "AntiJaggy" chains, denoise values, etc.)
+lives in Magpie's own settings file, **outside this folder entirely**:
+
+    C:\Users\Work\AppData\Local\Magpie\config\v2\config.json
+
+`magpie-scaling-modes-snapshot.json` in this repo is a **copy** for
+reference and version history. Editing it does nothing to the running
+app - Magpie only ever reads the AppData path above. If you change
+scaling modes through Magpie's own UI, re-copy that file into the repo
+to keep the snapshot current.
+
+Magpie also rewrites its entire config on exit, so any script-based edit
+to it must happen while Magpie is **closed** - editing it live gets
+silently overwritten the next time Magpie exits.
+
+## If you want the ONNX model instead of the shader chain
+
+The APISR conversion still works and is still in `Magpie/`, just not
+wired up:
 
     2x_APISR_RRDB_fp16.onnx     ESRGAN RRDB-6B, 4,472,963 params, 2x, fp16
 
-APISR is built around restoring hand-drawn lines damaged by compression,
-which matches the defects in Marvel's WebP files. RRDB-6B (6 blocks, not
-the usual 23) is what keeps it inside 4 GB of VRAM at 1080p input.
+RRDB-6B (6 blocks, not the usual 23) is what kept it inside 4GB VRAM at
+1080p input. To use it: close Magpie, rename `model.json.APISR-disabled`
+back to `model.json`, pick a scaling mode with no other upscale effects
+in the chain (the model already does 2x - stacking Anime4K/ACNet on top
+means 4x total, which risks exhausting VRAM).
 
-The DAT and GRL APISR variants are stronger but use architectures Magpie
-cannot load. Magpie supports ESRGAN, SPAN and WAIFU2X only.
-
-To revert to the fast lightweight model:
-  in E:\ComicUpscale\Magpie\, replace model.json with model.json.animejanai-backup
+Expect the halo/ringing artifacts mentioned above if you do this on
+already-clean art. It suits genuinely low-quality or heavily compressed
+source images better than Marvel's current remasters.
 
 ## Swapping in a different model
 
-1. Download any ESRGAN / SPAN / WAIFU2X .pth from https://openmodeldb.info
-   into E:\ComicUpscale\models\
-2. Edit the SRC path at the top of convert.py
-3. Run:
-      E:\ComicUpscale\venv\Scripts\python.exe E:\ComicUpscale\convert.py
-4. Copy the resulting fp16 .onnx into E:\ComicUpscale\Magpie\
-5. Point model.json at it (keep "scale" matching the model's real factor)
+1. Download any ESRGAN / SPAN / WAIFU2X `.pth` from
+   https://openmodeldb.info into `models\`
+2. Edit the `SRC` path at the top of `convert.py`
+3. Run: `venv\Scripts\python.exe convert.py`
+4. Copy the resulting fp16 `.onnx` into `Magpie\`
+5. Point `model.json` at it (`scale` must match the model's real factor)
 
-convert.py enforces Magpie's requirements and will refuse rather than
-produce a file that silently fails: dynamic [-1,3,-1,-1] NCHW shapes,
+`convert.py` enforces Magpie's requirements and refuses rather than
+produce a file that silently fails: dynamic `[-1,3,-1,-1]` NCHW shapes,
 matching input/output dtypes, and a verified integer scale factor.
-
-## Magpie settings that matter
-
-  scalingMode = Lanczos    Do NOT use ACNet/Anime4K here. Those add their
-                           own 2x on top of the model's 2x, giving 4x total
-                           (7680x4320) which will exhaust 4 GB of VRAM.
-  duplicateFrameDetectionMode = 1
-                           Static panels are not re-rendered, so a heavy
-                           model only costs a pause on each panel turn.
-  allowScalingMaximized = true
-
-Config file: C:\Users\Work\AppData\Local\Magpie\config\v2\config.json
-A .backup of the original sits beside it.
+`verify_chain.py` separately checks a scaling mode's effect files exist
+and computes its resulting resolution before you try running it.
 
 ## If the E: drive is unplugged
 
-None of this runs. Magpie, the models and the venv are all here. That is
-the tradeoff for keeping C: clear.
+None of this runs - Magpie, the models, and the venv are all here. That's
+the deliberate tradeoff for keeping C: clear.
 
 ## Known unknown
 
-We never established what resolution Marvel actually serves inside the
-reader - the probe scripts in tools\ kept measuring the outer page rather
-than the reader frame. If you ever want to settle it, run tools\probe-v3.js
-in the console with DevTools undocked AND the console pointed at the
-reader's iframe via the DevTools frame picker.
+Never established what resolution Marvel Unlimited actually serves
+inside the reader itself. The probe scripts in `tools\` kept measuring
+the outer marvel.com page - the reader runs in an iframe, and
+`document.querySelectorAll` doesn't cross into it. At real reading scale
+the practical result (8x chain, denoise 0.12-0.16) reads as clean with no
+visible artifacts, so this was never blocking, just unresolved.
