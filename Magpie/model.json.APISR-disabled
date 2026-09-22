@@ -1,0 +1,5 @@
+{
+    "path": "2x_APISR_RRDB_fp16.onnx",
+    "scale": 2,
+    "backend": "directml"
+}

@@ -1,0 +1,5 @@
+{
+    "path": "2x_AnimeJaNai_HD_V3_UltraCompact_425k-fp16.onnx",
+    "scale": 2,
+    "backend": "directml"
+}
