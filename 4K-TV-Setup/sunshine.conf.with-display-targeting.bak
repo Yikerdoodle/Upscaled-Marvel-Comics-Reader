@@ -1,0 +1,67 @@
+# Sunshine configuration - tuned for streaming a static/slow-changing
+# comic-reader image to a 4K TV, not for gaming. Encode latency is not a
+# constraint here (turning a page is not a reflex action), so every
+# setting below is pushed toward maximum quality rather than minimum
+# latency, which is the opposite of Sunshine's normal gaming-first defaults.
+
+# Force the hardware encoder on the GTX 1650 (Turing-generation NVENC).
+encoder = nvenc
+
+# P7 = slowest, highest-quality NVENC preset. Default is P1 (fastest) for
+# gaming; we have no latency budget to protect, so trade encode speed for
+# quality without hesitation.
+nvenc_preset = 7
+
+# Full-resolution two-pass analysis (vs the default quarter_res) - more
+# accurate motion/bitrate analysis per frame, slower to encode, and again
+# we have no reason not to pay that cost.
+nvenc_twopass = full_res
+
+# Directs more bits toward detailed regions (ink linework) and fewer
+# toward flat color fills - maps well onto comic art specifically.
+nvenc_spatial_aq = enabled
+
+# HEVC over H.264: better quality per bit, and the GTX 1650's NVENC
+# hardware supports it natively. hevc_mode 2 advertises Main10 support.
+hevc_mode = 2
+
+# DirectX Desktop Duplication API - Sunshine's own docs mark this as the
+# well-supported standard method on Windows. 'wgc' (Windows.Graphics.Capture,
+# what was tried first here on the reasoning that it matches Magpie's own
+# capture method) is documented as beta AND explicitly "not compatible with
+# the Sunshine service" - which is exactly the abort()/0xc0000409 crash in
+# ucrtbase.dll hit repeatedly against this virtual display, both as a
+# service and running interactively (confirmed via Windows Event Viewer,
+# same fault offset both times, ruling out a Session 0 explanation).
+capture = ddx
+
+# Generous ceiling for a strong LAN path. Real sustained usage will be far
+# lower for mostly-static comic content - codecs don't spend bandwidth
+# holding a frame that isn't changing - this just ensures that WHEN a
+# page turns, full detail gets captured rather than bitrate-starved.
+# Lower this if the bedroom-to-living-room WiFi path can't sustain it.
+bitrate = 60000
+
+# Output-display targeting. This is the virtual 4K display created by
+# Virtual Display Driver (VirtualDrivers/Virtual-Display-Driver), not the
+# physical laptop panel - confirmed active at 3840x2160@60Hz before this
+# was set, via direct EnumDisplaySettings readback, not assumed.
+#
+# IMPORTANT: this is Sunshine's OWN internal device_id, not the raw Windows
+# device-interface GUID. Sunshine hashes/derives its own id per display and
+# logs the full list under "Currently available display devices" on every
+# startup ("friendly_name": "VDD by MTT" identifies which entry is ours) -
+# a prior GUID here (extracted from \\?\DISPLAY#...#{GUID} instead) matched
+# no display in that list, which is the root cause that was hanging startup
+# every time the virtual display was present, regardless of every other
+# setting tried (capture method, GPU pinning, resolution/scale).
+output_name = {d54a4360-26df-5f1a-b161-298c03c03b66}
+
+# Force the streamed resolution/refresh to exactly match the virtual
+# display's real mode, rather than letting Sunshine auto-negotiate
+# something else with the Moonlight client.
+dd_resolution_option = manual
+dd_manual_resolution = 3840x2160
+dd_refresh_rate_option = manual
+dd_manual_refresh_rate = 60
+
