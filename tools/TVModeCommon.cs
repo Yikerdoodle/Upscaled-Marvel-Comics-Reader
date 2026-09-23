@@ -171,45 +171,71 @@ public static class TVMode {
     [DllImport("user32.dll")]
     private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
 
-    [DllImport("user32.dll")]
+    [DllImport("kernel32.dll")]
     private static extern uint GetCurrentThreadId();
 
-    // A background/hidden process's SetForegroundWindow calls get silently
-    // ignored by Windows once its "recent input event" allowance from
-    // being double-clicked has expired - confirmed live: a real
-    // double-click run left "Claude" itself as the foreground window
-    // afterward, well after enough time (infra check + Magpie startup)
-    // had passed for that allowance to lapse, and the target window ended
-    // up minimized because keystrokes meant for it (F11, Magpie's hotkey)
-    // went to whatever WAS actually focused instead.
+    [DllImport("user32.dll")]
+    private static extern bool BringWindowToTop(IntPtr hWnd);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MSG { public IntPtr hwnd; public uint message; public IntPtr wParam; public IntPtr lParam; public uint time; public int ptX, ptY; }
+
+    [DllImport("user32.dll")]
+    private static extern bool PeekMessage(out MSG lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax, uint wRemoveMsg);
+    private const uint PM_NOREMOVE = 0x0000;
+
+    // Last Focus() attempt's details, for troubleshooting from PowerShell.
+    public static string LastFocusDiagnostic = "";
+
+    // Brings hWnd to the foreground and returns whether that ACTUALLY
+    // happened - callers must check this before sending any keystrokes, so
+    // a failed focus can never type into whatever other app is in front.
     //
-    // The standard, reliable fix: temporarily attach this thread's input
-    // queue to the current foreground window's thread, which makes
-    // Windows treat this thread as if it were already focused, letting
-    // SetForegroundWindow succeed for real instead of being ignored.
-    private static void ForceForeground(IntPtr hWnd) {
+    // A hidden background process's plain SetForegroundWindow is silently
+    // ignored by Windows' foreground lock. The standard workaround:
+    // temporarily attach this thread's input queue to the current
+    // foreground window's thread so Windows treats this thread as already
+    // focused. AttachThreadInput needs both threads to have a message
+    // queue, which a PowerShell pipeline thread may not have yet -
+    // PeekMessage is the documented way to force one into existence.
+    public static bool Focus(IntPtr hWnd) {
+        EnsureDpiAware();
+        if (IsIconic(hWnd)) ShowWindow(hWnd, SW_RESTORE);
+        if (GetForegroundWindow() == hWnd) { LastFocusDiagnostic = "already foreground"; return true; }
+
+        MSG msg;
+        PeekMessage(out msg, IntPtr.Zero, 0, 0, PM_NOREMOVE);
+
         IntPtr foreground = GetForegroundWindow();
         uint foregroundPid;
         uint foregroundThread = GetWindowThreadProcessId(foreground, out foregroundPid);
         uint currentThread = GetCurrentThreadId();
         bool attached = foregroundThread != 0 && foregroundThread != currentThread &&
             AttachThreadInput(currentThread, foregroundThread, true);
+        bool setResult;
         try {
-            ShowWindow(hWnd, SW_RESTORE);
-            SetForegroundWindow(hWnd);
+            BringWindowToTop(hWnd);
+            setResult = SetForegroundWindow(hWnd);
         } finally {
             if (attached) AttachThreadInput(currentThread, foregroundThread, false);
         }
+
+        for (int i = 0; i < 20 && GetForegroundWindow() != hWnd; i++) System.Threading.Thread.Sleep(50);
+        bool ok = GetForegroundWindow() == hWnd;
+        LastFocusDiagnostic = "attached=" + attached + " SetForegroundWindow=" + setResult + " nowForeground=" + ok;
+        return ok;
     }
 
+    public static void Restore(IntPtr hWnd) {
+        if (IsIconic(hWnd)) ShowWindow(hWnd, SW_RESTORE);
+    }
+
+    // Positioning doesn't need foreground rights, so this deliberately
+    // doesn't try to focus - that's Focus()'s job, checked separately.
     public static void MoveWindowTo(IntPtr hWnd, int x, int y, int width, int height) {
         EnsureDpiAware();
-        ForceForeground(hWnd);
+        Restore(hWnd);
         SetWindowPos(hWnd, IntPtr.Zero, x, y, width, height, SWP_NOZORDER | SWP_SHOWWINDOW);
-    }
-
-    public static void Focus(IntPtr hWnd) {
-        ForceForeground(hWnd);
     }
 
     // ---- Raw key-combo sending. Magpie's Win+Shift+A hotkey can't be

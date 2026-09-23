@@ -29,9 +29,10 @@ while ((Get-Date) -lt $maxRuntime) {
     if (-not $fg -or ($fg.ProcessId -notin $procs.Id)) { continue }
 
     if (Test-WindowIsFullscreenOnItsMonitor -WinInfo $fg) {
+        # No virtual display (e.g. Quit was used meanwhile) - nothing to do.
         $monitor = Get-VirtualDisplayMonitor
-        if ($monitor -and -not ($fg.Left -eq $monitor.Left -and $fg.Top -eq $monitor.Top)) {
-            Move-WindowToVirtualDisplayAndFullscreen -Hwnd $fg.Handle -Monitor $monitor -AlreadyFullscreen
+        if ($monitor) {
+            Move-WindowToVirtualDisplayAndFullscreen -Hwnd $fg.Handle -Monitor $monitor
         }
         break
     }

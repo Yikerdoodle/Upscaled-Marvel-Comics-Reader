@@ -121,39 +121,56 @@ function Find-MarvelOrBlankBrowserWindow {
     return @{ Marvel = $marvelMatch; Blank = $blankMatch; AllWindows = $windows }
 }
 
+function Assert-Focused {
+    <# Every keystroke this tool sends goes through here first. If the
+       target window can't be confirmed in the foreground, throw instead of
+       sending - otherwise the keys land in whatever app IS in front
+       (observed: Ctrl+T and "marvel0 " typed into a different app when
+       focusing failed). #>
+    param([Parameter(Mandatory)][IntPtr]$Hwnd)
+    if (-not [TVMode]::Focus($Hwnd)) {
+        throw "Couldn't bring the browser window to the front ($([TVMode]::LastFocusDiagnostic)), so no keystrokes were sent - rather than risk typing into a different app."
+    }
+    Start-Sleep -Milliseconds 150
+}
+
 function Move-WindowToVirtualDisplayAndFullscreen {
-    <# Idempotent on purpose: F11 TOGGLES fullscreen, so blindly re-sending
-       it (and the Magpie toggle) to a window that's already correctly
-       positioned from a previous run would turn both back OFF instead of
-       leaving them alone - confirmed live: a second run against an
-       already-fullscreened window left it minimized, because it exited
-       fullscreen (F11 toggle) after MoveWindowTo's ShowWindow(SW_RESTORE)
-       silently desynced the OS window state from Firefox's own internal
-       fullscreen flag. Checking current bounds first avoids re-touching a
-       window that's already exactly where it should be. #>
+    <# Idempotent on purpose: F11 TOGGLES fullscreen, so a window that's
+       already exactly on the virtual display is left alone rather than
+       having F11 (and Magpie's toggle) blindly re-sent to it. #>
     param(
         [Parameter(Mandatory)][IntPtr]$Hwnd,
-        [Parameter(Mandatory)]$Monitor,
-        [switch]$AlreadyFullscreen
+        [Parameter(Mandatory)]$Monitor
     )
 
+    # Restore first so the real (non-minimized) geometry can be inspected.
+    [TVMode]::Restore($Hwnd)
+    Start-Sleep -Milliseconds 300
+
     $before = [TVMode]::GetWindowInfo($Hwnd)
-    $alreadyInPlace = -not [TVMode]::IsMinimized($Hwnd) -and
-        $before.Left -eq $Monitor.Left -and $before.Top -eq $Monitor.Top -and
+    $alreadyInPlace = $before.Left -eq $Monitor.Left -and $before.Top -eq $Monitor.Top -and
         $before.Right -eq $Monitor.Right -and $before.Bottom -eq $Monitor.Bottom
     if ($alreadyInPlace) { return }
 
+    # Fullscreen on some OTHER monitor - e.g. the laptop screen, where
+    # Windows relocates it when Quit disables the virtual display, or where
+    # you pressed F11 yourself while the watcher was waiting. F11 toggles,
+    # so exit fullscreen from this known state first, then move and
+    # re-enter it on the TV display, rather than guessing what a single
+    # blind F11 would do.
+    if (Test-WindowIsFullscreenOnItsMonitor -WinInfo $before) {
+        Assert-Focused -Hwnd $Hwnd
+        [TVMode]::SendKeyCombo(@([TVMode]::VK_F11))
+        Start-Sleep -Milliseconds 700
+    }
+
     [TVMode]::MoveWindowTo($Hwnd, $Monitor.Left, $Monitor.Top, $Monitor.Width, $Monitor.Height)
     Start-Sleep -Milliseconds 400
-    if (-not $AlreadyFullscreen) {
-        [TVMode]::Focus($Hwnd)
-        Start-Sleep -Milliseconds 200
-        [TVMode]::SendKeyCombo(@([TVMode]::VK_F11))
-        Start-Sleep -Milliseconds 500
-    }
+    Assert-Focused -Hwnd $Hwnd
+    [TVMode]::SendKeyCombo(@([TVMode]::VK_F11))
+    Start-Sleep -Milliseconds 500
     # Turn Magpie's upscaling on for this now-fullscreened, now-focused window.
-    [TVMode]::Focus($Hwnd)
-    Start-Sleep -Milliseconds 200
+    Assert-Focused -Hwnd $Hwnd
     [TVMode]::SendKeyCombo(@([TVMode]::VK_LWIN, [TVMode]::VK_SHIFT, [TVMode]::VK_A))
 }
 
