@@ -128,9 +128,16 @@ protocols are built.
 
    The launcher also leaves a small "4K" icon in the system tray (separate
    from Magpie's and Sunshine's own tray icons) - right-click it and choose
-   **Quit** to stop both Magpie and Sunshine completely in one action, when
-   you're done reading. Double-clicking the launcher again afterward brings
-   everything back from scratch, including a fresh tray icon.
+   **Quit** when you're done reading. That stops Magpie and Sunshine,
+   disables the virtual 4K display entirely, and puts Windows back to
+   "PC screen only" (Win+P), so the invisible monitor only exists while
+   you're actually streaming to the TV. Double-clicking the launcher again
+   brings everything back from scratch in order: re-enable the display ->
+   Extend (Windows usually restores this by itself; the launcher forces it
+   if not) -> enforce 3840x2160 -> restart Sunshine last, since Sunshine
+   only discovers displays at its own startup. Sunshine's `output_name`
+   device ID stays stable across this cycle even though Windows renumbers
+   the display (`DISPLAY17` -> `DISPLAY18` -> ...), confirmed from its log.
 
 4. **In Moonlight on the Apple TV:** select "Desktop" and start streaming.
 
