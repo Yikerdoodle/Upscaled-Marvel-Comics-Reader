@@ -168,16 +168,48 @@ public static class TVMode {
         return IsIconic(hWnd);
     }
 
+    [DllImport("user32.dll")]
+    private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetCurrentThreadId();
+
+    // A background/hidden process's SetForegroundWindow calls get silently
+    // ignored by Windows once its "recent input event" allowance from
+    // being double-clicked has expired - confirmed live: a real
+    // double-click run left "Claude" itself as the foreground window
+    // afterward, well after enough time (infra check + Magpie startup)
+    // had passed for that allowance to lapse, and the target window ended
+    // up minimized because keystrokes meant for it (F11, Magpie's hotkey)
+    // went to whatever WAS actually focused instead.
+    //
+    // The standard, reliable fix: temporarily attach this thread's input
+    // queue to the current foreground window's thread, which makes
+    // Windows treat this thread as if it were already focused, letting
+    // SetForegroundWindow succeed for real instead of being ignored.
+    private static void ForceForeground(IntPtr hWnd) {
+        IntPtr foreground = GetForegroundWindow();
+        uint foregroundPid;
+        uint foregroundThread = GetWindowThreadProcessId(foreground, out foregroundPid);
+        uint currentThread = GetCurrentThreadId();
+        bool attached = foregroundThread != 0 && foregroundThread != currentThread &&
+            AttachThreadInput(currentThread, foregroundThread, true);
+        try {
+            ShowWindow(hWnd, SW_RESTORE);
+            SetForegroundWindow(hWnd);
+        } finally {
+            if (attached) AttachThreadInput(currentThread, foregroundThread, false);
+        }
+    }
+
     public static void MoveWindowTo(IntPtr hWnd, int x, int y, int width, int height) {
         EnsureDpiAware();
-        ShowWindow(hWnd, SW_RESTORE);
-        SetForegroundWindow(hWnd);
+        ForceForeground(hWnd);
         SetWindowPos(hWnd, IntPtr.Zero, x, y, width, height, SWP_NOZORDER | SWP_SHOWWINDOW);
     }
 
     public static void Focus(IntPtr hWnd) {
-        ShowWindow(hWnd, SW_RESTORE);
-        SetForegroundWindow(hWnd);
+        ForceForeground(hWnd);
     }
 
     // ---- Raw key-combo sending. Magpie's Win+Shift+A hotkey can't be
