@@ -126,6 +126,12 @@ protocols are built.
    there with F11, switch Magpie's mode to "TV 4K" from its tray icon,
    then press Win+Shift+A with that window focused.)
 
+   The launcher also leaves a small "4K" icon in the system tray (separate
+   from Magpie's and Sunshine's own tray icons) - right-click it and choose
+   **Quit** to stop both Magpie and Sunshine completely in one action, when
+   you're done reading. Double-clicking the launcher again afterward brings
+   everything back from scratch, including a fresh tray icon.
+
 4. **In Moonlight on the Apple TV:** select "Desktop" and start streaming.
 
 5. **On the LG TV itself:** switch its picture mode to something like
