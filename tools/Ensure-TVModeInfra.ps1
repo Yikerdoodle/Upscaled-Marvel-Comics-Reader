@@ -6,10 +6,17 @@
   (pnputil enable-device, Start-Service/Stop-Service) without a UAC
   prompt firing on every read.
 
-  Only touches anything if the virtual display is off or Sunshine isn't
-  already running - the common case (both already fine) exits fast,
-  since Sunshine only enumerates displays once at its own startup and a
-  needless restart would just add a multi-second delay for nothing.
+  Two modes, chosen by an action flag file (since a Scheduled Task's own
+  Action arguments are fixed at registration time - this is how the same
+  already-registered, already-ACL-opened task serves both without
+  needing a second one set up the same painful way):
+    - default / "ensure" (no flag file, or it says "ensure"): only
+      touches anything if the virtual display is off or Sunshine isn't
+      already running - the common case (both already fine) exits fast.
+    - "stop-sunshine": the tray icon's Quit action - stops Sunshine
+      completely (service + any lingering process). Does NOT touch the
+      virtual display - nobody asked for that, and leaving it enabled is
+      the established low-risk steady state.
 
   Writes a status JSON file the non-elevated launcher polls for, since
   Scheduled Tasks triggered via Start-ScheduledTask don't return output
@@ -17,12 +24,33 @@
 #>
 
 $statusPath = Join-Path $PSScriptRoot '.tv-infra-status.json'
+$actionFlagPath = Join-Path $PSScriptRoot '.tv-mode-action'
 $status = [ordered]@{
     timestamp            = $null
     success              = $false
     vddWasEnabled        = $false
     sunshineWasRestarted = $false
     error                = $null
+}
+
+$action = 'ensure'
+if (Test-Path $actionFlagPath) {
+    $action = (Get-Content $actionFlagPath -Raw -ErrorAction SilentlyContinue).Trim()
+    Remove-Item $actionFlagPath -Force -ErrorAction SilentlyContinue
+}
+
+if ($action -eq 'stop-sunshine') {
+    try {
+        Stop-Service SunshineService -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 1
+        Get-Process sunshine -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+        $status.success = $true
+    } catch {
+        $status.error = $_.Exception.Message
+    }
+    $status.timestamp = (Get-Date).ToString('o')
+    $status | ConvertTo-Json | Set-Content -Path $statusPath -Encoding UTF8
+    exit 0
 }
 
 try {

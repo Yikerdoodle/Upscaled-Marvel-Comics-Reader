@@ -12,6 +12,7 @@ Magpie/logs/
 4K-TV-Setup/*.log
 tools/*.log
 tools/.tv-infra-status.json
+tools/.tv-mode-action
 
 __pycache__/
 *.pyc

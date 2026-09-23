@@ -184,3 +184,60 @@ if ($result.Marvel) {
         '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$watcherScript`"", '-BrowserExe', "`"$browserExe`""
     )
 }
+
+# --- Step 5: tray icon, right-click > Quit stops Magpie and Sunshine ---
+# A named mutex means a repeat double-click of the launcher (e.g. to jump
+# to a different issue) just does steps 1-4 above again and exits, rather
+# than piling up a second icon - only the first still-running instance
+# keeps holding this and stays around to host it.
+$actionFlagPath = Join-Path $PSScriptRoot '.tv-mode-action'
+$mutex = New-Object System.Threading.Mutex($false, 'Global\ComicUpscaleTVModeTrayIcon')
+if ($mutex.WaitOne(0)) {
+    Add-Type -AssemblyName System.Drawing
+
+    $bmp = New-Object System.Drawing.Bitmap 32, 32
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+    $g.Clear([System.Drawing.Color]::FromArgb(255, 20, 20, 24))
+    $g.FillRectangle([System.Drawing.Brushes]::White, 2, 2, 28, 28)
+    $g.FillRectangle((New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 20, 20, 24))), 4, 4, 24, 24)
+    $font = New-Object System.Drawing.Font('Segoe UI', 9, [System.Drawing.FontStyle]::Bold)
+    $g.DrawString('4K', $font, [System.Drawing.Brushes]::White, 2.0, 9.0)
+    $hIcon = $bmp.GetHicon()
+    $icon = [System.Drawing.Icon]::FromHandle($hIcon)
+
+    $trayIcon = New-Object System.Windows.Forms.NotifyIcon
+    $trayIcon.Icon = $icon
+    $trayIcon.Text = 'Marvel Comics - 4K TV Mode'
+    $trayIcon.Visible = $true
+
+    $menu = New-Object System.Windows.Forms.ContextMenuStrip
+    $quitItem = New-Object System.Windows.Forms.ToolStripMenuItem 'Quit'
+    $quitItem.add_Click({
+        $trayIcon.Visible = $false
+
+        Get-Process Magpie -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+
+        # Sunshine's service needs admin rights to stop - routed through
+        # the same silent, pre-approved elevated task used to start it,
+        # rather than a second one that would need its own separate
+        # (manual, deliberate-by-design) ACL fix.
+        Set-Content -Path $actionFlagPath -Value 'stop-sunshine' -Encoding UTF8 -Force
+        if (Test-Path $statusPath) { Remove-Item $statusPath -Force -ErrorAction SilentlyContinue }
+        try { Start-ScheduledTask -TaskName $elevatedTaskName -ErrorAction Stop } catch { }
+
+        $deadline = (Get-Date).AddSeconds(20)
+        while (-not (Test-Path $statusPath) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 300 }
+
+        [System.Windows.Forms.Application]::Exit()
+    })
+    [void]$menu.Items.Add($quitItem)
+    $trayIcon.ContextMenuStrip = $menu
+
+    [System.Windows.Forms.Application]::Run()
+
+    $trayIcon.Visible = $false
+    $trayIcon.Dispose()
+    $mutex.ReleaseMutex()
+}
+$mutex.Dispose()
