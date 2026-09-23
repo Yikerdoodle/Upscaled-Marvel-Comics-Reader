@@ -141,14 +141,31 @@ public static class TVMode {
         EnsureDpiAware();
         IntPtr h = GetForegroundWindow();
         if (h == IntPtr.Zero) return null;
+        return GetWindowInfo(h);
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool IsIconic(IntPtr hWnd);
+
+    // Info for an arbitrary window handle, not just the foreground one -
+    // used to check a specific target window's CURRENT state (position,
+    // minimized or not) before deciding whether it needs moving/
+    // fullscreening again, so an already-correct window is left alone
+    // instead of having F11 (a toggle) blindly re-sent to it.
+    public static WinInfo GetWindowInfo(IntPtr hWnd) {
+        EnsureDpiAware();
         uint pid;
-        GetWindowThreadProcessId(h, out pid);
-        int len = GetWindowTextLength(h);
+        GetWindowThreadProcessId(hWnd, out pid);
+        int len = GetWindowTextLength(hWnd);
         var sb = new StringBuilder(len + 1);
-        GetWindowText(h, sb, sb.Capacity);
+        GetWindowText(hWnd, sb, sb.Capacity);
         RECT r;
-        GetWindowRect(h, out r);
-        return new WinInfo { Handle = h, ProcessId = pid, Title = sb.ToString(), Left = r.Left, Top = r.Top, Right = r.Right, Bottom = r.Bottom };
+        GetWindowRect(hWnd, out r);
+        return new WinInfo { Handle = hWnd, ProcessId = pid, Title = sb.ToString(), Left = r.Left, Top = r.Top, Right = r.Right, Bottom = r.Bottom };
+    }
+
+    public static bool IsMinimized(IntPtr hWnd) {
+        return IsIconic(hWnd);
     }
 
     public static void MoveWindowTo(IntPtr hWnd, int x, int y, int width, int height) {

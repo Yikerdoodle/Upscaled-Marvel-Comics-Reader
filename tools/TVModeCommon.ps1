@@ -122,11 +122,27 @@ function Find-MarvelOrBlankBrowserWindow {
 }
 
 function Move-WindowToVirtualDisplayAndFullscreen {
+    <# Idempotent on purpose: F11 TOGGLES fullscreen, so blindly re-sending
+       it (and the Magpie toggle) to a window that's already correctly
+       positioned from a previous run would turn both back OFF instead of
+       leaving them alone - confirmed live: a second run against an
+       already-fullscreened window left it minimized, because it exited
+       fullscreen (F11 toggle) after MoveWindowTo's ShowWindow(SW_RESTORE)
+       silently desynced the OS window state from Firefox's own internal
+       fullscreen flag. Checking current bounds first avoids re-touching a
+       window that's already exactly where it should be. #>
     param(
         [Parameter(Mandatory)][IntPtr]$Hwnd,
         [Parameter(Mandatory)]$Monitor,
         [switch]$AlreadyFullscreen
     )
+
+    $before = [TVMode]::GetWindowInfo($Hwnd)
+    $alreadyInPlace = -not [TVMode]::IsMinimized($Hwnd) -and
+        $before.Left -eq $Monitor.Left -and $before.Top -eq $Monitor.Top -and
+        $before.Right -eq $Monitor.Right -and $before.Bottom -eq $Monitor.Bottom
+    if ($alreadyInPlace) { return }
+
     [TVMode]::MoveWindowTo($Hwnd, $Monitor.Left, $Monitor.Top, $Monitor.Width, $Monitor.Height)
     Start-Sleep -Milliseconds 400
     if (-not $AlreadyFullscreen) {
