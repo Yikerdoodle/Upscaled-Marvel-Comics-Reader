@@ -1,552 +1,770 @@
 {
-    "language": "",
-    "theme": 2,
-    "windowPos": {
-        "centerX": 849.0,
-        "centerY": 562.5,
-        "width": 980.0,
-        "height": 690.0,
-        "maximized": false
-    },
-    "shortcuts": {
-        "scale": 2369,
-        "overlay": 2372
-    },
-    "autoRestore": false,
-    "countdownSeconds": 3,
-    "developerMode": false,
-    "debugMode": false,
-    "disableEffectCache": false,
-    "disableFontCache": false,
-    "saveEffectSources": false,
-    "warningsAreErrors": false,
-    "allowScalingMaximized": true,
-    "simulateExclusiveFullscreen": false,
-    "alwaysRunAsAdmin": false,
-    "showNotifyIcon": true,
-    "inlineParams": false,
-    "autoCheckForUpdates": true,
-    "checkForPreviewUpdates": false,
-    "updateCheckDate": 0,
-    "duplicateFrameDetectionMode": 1,
-    "enableStatisticsForDynamicDetection": false,
-    "scalingModes": [
-        {
-            "name": "Lanczos",
-            "effects": [
-                {
-                    "name": "Lanczos",
-                    "scalingType": 1,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            ]
-        },
-        {
-            "name": "FSR",
-            "effects": [
-                {
-                    "name": "FSR\\FSR_EASU",
-                    "scalingType": 1,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                },
-                {
-                    "name": "FSR\\FSR_RCAS",
-                    "parameters": {
-                        "sharpness": 0.8700000047683716
-                    }
-                }
-            ]
-        },
-        {
-            "name": "FSRCNNX",
-            "effects": [
-                {
-                    "name": "FSRCNNX\\FSRCNNX"
-                }
-            ]
-        },
-        {
-            "name": "ACNet",
-            "effects": [
-                {
-                    "name": "ACNet"
-                }
-            ]
-        },
-        {
-            "name": "Anime4K",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_Denoise_L"
-                }
-            ]
-        },
-        {
-            "name": "CRT-Geom",
-            "effects": [
-                {
-                    "name": "CRT\\CRT_Geom",
-                    "scalingType": 1,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    },
-                    "parameters": {
-                        "monitorGamma": 2.200000047683716,
-                        "cornerSize": 0.0010000000474974513,
-                        "curvature": 0.0,
-                        "interlace": 0.0,
-                        "CRTGamma": 1.5
-                    }
-                }
-            ]
-        },
-        {
-            "name": "Integer Scale 2x",
-            "effects": [
-                {
-                    "name": "Nearest",
-                    "scalingType": 0,
-                    "scale": {
-                        "x": 2.0,
-                        "y": 2.0
-                    }
-                }
-            ]
-        },
-        {
-            "name": "LineArt (FSRCNNX)",
-            "effects": [
-                {
-                    "name": "FSRCNNX\\FSRCNNX_LineArt"
-                }
-            ]
-        },
-        {
-            "name": "CuNNy 8x16C",
-            "effects": [
-                {
-                    "name": "CuNNy\\CuNNy-8x16C-NVL"
-                }
-            ]
-        },
-        {
-            "name": "CuNNy 8x16C denoise",
-            "effects": [
-                {
-                    "name": "CuNNy\\CuNNy-8x16C-NVL-DN"
-                }
-            ]
-        },
-        {
-            "name": "Anime4K Soft",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_L"
-                }
-            ]
-        },
-        {
-            "name": "Smooth",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.30000001192092896
-                    }
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                }
-            ]
-        },
-        {
-            "name": "Smooth+Supersample",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.30000001192092896
-                    }
-                },
-                {
-                    "name": "CuNNy\\CuNNy-8x16C-NVL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                }
-            ]
-        },
-        {
-            "name": "Smooth Max",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 1.0
-                    }
-                },
-                {
-                    "name": "Deband",
-                    "parameters": {
-                        "threshold": 96.0,
-                        "range": 8.0,
-                        "grain": 0.0,
-                        "iterations": 4.0
-                    }
-                },
-                {
-                    "name": "CuNNy\\CuNNy-8x16C-NVL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                }
-            ]
-        },
-        {
-            "name": "AntiJaggy MAX",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.30000001192092896
-                    }
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Restore_Soft_UL"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "FXAA\\FXAA_Ultra"
-                }
-            ]
-        },
-        {
-            "name": "AntiJaggy",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.30000001192092896
-                    }
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Restore_Soft_UL"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                }
-            ]
-        },
-        {
-            "name": "AntiJaggy Thin",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.30000001192092896
-                    }
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Restore_Soft_UL"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Thin_HQ",
-                    "parameters": {
-                        "iterations": 1.0,
-                        "strength": 0.4000000059604645
-                    }
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "FXAA\\FXAA_Ultra"
-                }
-            ]
-        },
-        {
-            "name": "AntiJaggy 4x",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.30000001192092896
-                    }
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Restore_Soft_UL"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "FXAA\\FXAA_Ultra"
-                }
-            ]
-        },
-        {
-            "name": "AntiJaggy 6x",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.30000001192092896
-                    }
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Restore_Soft_UL"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Lanczos",
-                    "scalingType": 0,
-                    "scale": {
-                        "x": 1.5,
-                        "y": 1.5
-                    }
-                },
-                {
-                    "name": "FXAA\\FXAA_Ultra"
-                }
-            ]
-        },
-        {
-            "name": "AntiJaggy 8x",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.30000001192092896
-                    }
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Restore_Soft_UL"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Lanczos",
-                    "scalingType": 0,
-                    "scale": {
-                        "x": 2.0,
-                        "y": 2.0
-                    }
-                },
-                {
-                    "name": "FXAA\\FXAA_Ultra"
-                }
-            ]
-        },
-        {
-            "name": "AntiJaggy 8x Clean",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.11999999731779099
-                    }
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Restore_Soft_UL"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Lanczos",
-                    "scalingType": 0,
-                    "scale": {
-                        "x": 2.0,
-                        "y": 2.0
-                    }
-                }
-            ]
-        },
-        {
-            "name": "AntiJaggy 10x Ultra",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.11999999731779099
-                    }
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Restore_Soft_UL"
-                },
-                {
-                    "name": "CuNNy\\CuNNy-8x16C-NVL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "CuNNy\\CuNNy-8x16C-NVL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Lanczos",
-                    "scalingType": 0,
-                    "scale": {
-                        "x": 2.5,
-                        "y": 2.5
-                    }
-                }
-            ]
-        },
-        {
-            "name": "AntiJaggy 8x CuNNy",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.11999999731779099
-                    }
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Restore_Soft_UL"
-                },
-                {
-                    "name": "CuNNy\\CuNNy-8x16C-NVL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "CuNNy\\CuNNy-8x16C-NVL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Lanczos",
-                    "scalingType": 0,
-                    "scale": {
-                        "x": 2.0,
-                        "y": 2.0
-                    }
-                }
-            ]
-        },
-        {
-            "name": "AntiJaggy 8.5x",
-            "effects": [
-                {
-                    "name": "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
-                    "parameters": {
-                        "intensitySigma": 0.1599999964237213
-                    }
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Restore_Soft_UL"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Anime4K\\Anime4K_Upscale_UL"
-                },
-                {
-                    "name": "SMAA\\SMAA_Ultra"
-                },
-                {
-                    "name": "Lanczos",
-                    "scalingType": 0,
-                    "scale": {
-                        "x": 2.125,
-                        "y": 2.125
-                    }
-                }
-            ]
-        }
-    ],
-    "profiles": [
-        {
-            "scalingMode": 23,
-            "captureMethod": 0,
-            "multiMonitorUsage": 0,
-            "graphicsCard": -1,
-            "frameRateLimiterEnabled": false,
-            "maxFrameRate": 60.0,
-            "disableWindowResizing": false,
-            "3DGameMode": false,
-            "showFPS": false,
-            "captureTitleBar": false,
-            "adjustCursorSpeed": true,
-            "drawCursor": true,
-            "disableDirectFlip": false,
-            "cursorScaling": 2,
-            "customCursorScaling": 1.0,
-            "cursorInterpolationMode": 0,
-            "croppingEnabled": false,
-            "cropping": {
-                "left": 0.0,
-                "top": 0.0,
-                "right": 0.0,
-                "bottom": 0.0
-            }
-        }
-    ]
+    "language":  "",
+    "theme":  2,
+    "windowPos":  {
+                      "centerX":  849.0,
+                      "centerY":  562.5,
+                      "width":  980.0,
+                      "height":  690.0,
+                      "maximized":  false
+                  },
+    "shortcuts":  {
+                      "scale":  2369,
+                      "overlay":  2372
+                  },
+    "autoRestore":  false,
+    "countdownSeconds":  3,
+    "developerMode":  false,
+    "debugMode":  false,
+    "disableEffectCache":  false,
+    "disableFontCache":  false,
+    "saveEffectSources":  false,
+    "warningsAreErrors":  false,
+    "allowScalingMaximized":  true,
+    "simulateExclusiveFullscreen":  false,
+    "alwaysRunAsAdmin":  false,
+    "showNotifyIcon":  true,
+    "inlineParams":  false,
+    "autoCheckForUpdates":  true,
+    "checkForPreviewUpdates":  false,
+    "updateCheckDate":  0,
+    "duplicateFrameDetectionMode":  1,
+    "enableStatisticsForDynamicDetection":  false,
+    "scalingModes":  [
+                         {
+                             "name":  "Lanczos",
+                             "effects":  [
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  1,
+                                                 "scale":  {
+                                                               "x":  1.0,
+                                                               "y":  1.0
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "FSR",
+                             "effects":  [
+                                             {
+                                                 "name":  "FSR\\FSR_EASU",
+                                                 "scalingType":  1,
+                                                 "scale":  {
+                                                               "x":  1.0,
+                                                               "y":  1.0
+                                                           }
+                                             },
+                                             {
+                                                 "name":  "FSR\\FSR_RCAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  0.8700000047683716
+                                                                }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "FSRCNNX",
+                             "effects":  [
+                                             {
+                                                 "name":  "FSRCNNX\\FSRCNNX"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "ACNet",
+                             "effects":  [
+                                             {
+                                                 "name":  "ACNet"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "Anime4K",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_Denoise_L"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "CRT-Geom",
+                             "effects":  [
+                                             {
+                                                 "name":  "CRT\\CRT_Geom",
+                                                 "scalingType":  1,
+                                                 "scale":  {
+                                                               "x":  1.0,
+                                                               "y":  1.0
+                                                           },
+                                                 "parameters":  {
+                                                                    "monitorGamma":  2.200000047683716,
+                                                                    "cornerSize":  0.0010000000474974513,
+                                                                    "curvature":  0.0,
+                                                                    "interlace":  0.0,
+                                                                    "CRTGamma":  1.5
+                                                                }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "Integer Scale 2x",
+                             "effects":  [
+                                             {
+                                                 "name":  "Nearest",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.0,
+                                                               "y":  2.0
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "LineArt (FSRCNNX)",
+                             "effects":  [
+                                             {
+                                                 "name":  "FSRCNNX\\FSRCNNX_LineArt"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "CuNNy 8x16C",
+                             "effects":  [
+                                             {
+                                                 "name":  "CuNNy\\CuNNy-8x16C-NVL"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "CuNNy 8x16C denoise",
+                             "effects":  [
+                                             {
+                                                 "name":  "CuNNy\\CuNNy-8x16C-NVL-DN"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "Anime4K Soft",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_L"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "Smooth",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.30000001192092896
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "Smooth+Supersample",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.30000001192092896
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "CuNNy\\CuNNy-8x16C-NVL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "Smooth Max",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  1.0
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Deband",
+                                                 "parameters":  {
+                                                                    "threshold":  96.0,
+                                                                    "range":  8.0,
+                                                                    "grain":  0.0,
+                                                                    "iterations":  4.0
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "CuNNy\\CuNNy-8x16C-NVL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy MAX",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.30000001192092896
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "FXAA\\FXAA_Ultra"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.30000001192092896
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy Thin",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.30000001192092896
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Thin_HQ",
+                                                 "parameters":  {
+                                                                    "iterations":  1.0,
+                                                                    "strength":  0.4000000059604645
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "FXAA\\FXAA_Ultra"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 4x",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.30000001192092896
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "FXAA\\FXAA_Ultra"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 6x",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.30000001192092896
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  1.5,
+                                                               "y":  1.5
+                                                           }
+                                             },
+                                             {
+                                                 "name":  "FXAA\\FXAA_Ultra"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8x",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.30000001192092896
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.0,
+                                                               "y":  2.0
+                                                           }
+                                             },
+                                             {
+                                                 "name":  "FXAA\\FXAA_Ultra"
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8x Clean",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.11999999731779099
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.0,
+                                                               "y":  2.0
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 10x Ultra",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.11999999731779099
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "CuNNy\\CuNNy-8x16C-NVL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "CuNNy\\CuNNy-8x16C-NVL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.5,
+                                                               "y":  2.5
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8x CuNNy",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.11999999731779099
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "CuNNy\\CuNNy-8x16C-NVL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "CuNNy\\CuNNy-8x16C-NVL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.0,
+                                                               "y":  2.0
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.1599999964237213
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x Sharp",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             },
+                                             {
+                                                 "name":  "Sharpen\\LumaSharpen",
+                                                 "parameters":  {
+                                                                    "offsetBias":  1.0,
+                                                                    "sharpStrength":  0.30000001192092896,
+                                                                    "sharpClamp":  0.019999999552965164,
+                                                                    "pattern":  1.0
+                                                                }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x Sharp-Light",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             },
+                                             {
+                                                 "name":  "Sharpen\\LumaSharpen",
+                                                 "parameters":  {
+                                                                    "offsetBias":  1.0,
+                                                                    "pattern":  1.0,
+                                                                    "sharpClamp":  0.009999999776482582,
+                                                                    "sharpStrength":  0.20000000298023224
+                                                                }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NoSharp",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x Mean",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mean",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x LineProtect",
+                             "effects":  [
+                                             {
+                                                 "name":  "Custom\\DenoiseLineProtect",
+                                                 "parameters":  {
+                                                                    "edgeThreshold":  0.18000000715255737,
+                                                                    "edgeSoftness":  0.05000000074505806,
+                                                                    "intensitySigma":  0.3499999940395355,
+                                                                    "inkSoftness":  0.05999999865889549,
+                                                                    "inkThreshold":  0.11999999731779099
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "TV 4K",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.22
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             }
+                                         ]
+                         }
+                     ],
+    "profiles":  [
+                     {
+                         "scalingMode":  29,
+                         "captureMethod":  0,
+                         "multiMonitorUsage":  0,
+                         "graphicsCard":  -1,
+                         "frameRateLimiterEnabled":  false,
+                         "maxFrameRate":  60.0,
+                         "disableWindowResizing":  false,
+                         "3DGameMode":  false,
+                         "showFPS":  false,
+                         "captureTitleBar":  false,
+                         "adjustCursorSpeed":  true,
+                         "drawCursor":  true,
+                         "disableDirectFlip":  false,
+                         "cursorScaling":  2,
+                         "customCursorScaling":  1.0,
+                         "cursorInterpolationMode":  0,
+                         "croppingEnabled":  false,
+                         "cropping":  {
+                                          "left":  0.0,
+                                          "top":  0.0,
+                                          "right":  0.0,
+                                          "bottom":  0.0
+                                      }
+                     }
+                 ]
 }
