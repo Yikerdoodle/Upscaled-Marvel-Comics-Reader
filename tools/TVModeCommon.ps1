@@ -1,12 +1,191 @@
 <#
   Shared functions for the "Read Marvel Comics Upscaled - 4K TV Mode"
-  launcher. Dot-sourced by both Start-ComicMode-TV.ps1 (the main
-  orchestrator) and Watch-BrowserFullscreen.ps1 (the background watcher),
-  so window/monitor/browser logic only exists in one place.
+  launcher. Dot-sourced by Start-ComicMode-TV.ps1 (the main orchestrator),
+  TVModeTray.ps1 (the tray icon / Quit) and Watch-BrowserFullscreen.ps1
+  (the background F11 watcher), so this logic only exists in one place.
 #>
 
 Add-Type -Path (Join-Path $PSScriptRoot 'TVModeCommon.cs') -ErrorAction Stop
 Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Windows.Forms
+
+$script:TVStatusPath       = Join-Path $PSScriptRoot '.tv-infra-status.json'
+$script:TVActionFlagPath   = Join-Path $PSScriptRoot '.tv-mode-action'
+$script:TVElevatedTaskName = 'ComicUpscale-TVMode-ElevatedHelper'
+$script:TVDisplaySwitchExe = Join-Path $env:SystemRoot 'System32\DisplaySwitch.exe'
+
+function Invoke-ElevatedAction {
+    <# Runs one action of Ensure-TVModeInfra.ps1 through the pre-approved
+       elevated Scheduled Task (silent, no UAC) and returns its status. #>
+    param([Parameter(Mandatory)][string]$Action, [int]$TimeoutSeconds = 95)
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+
+    # The task is set to IgnoreNew, so a trigger while a previous action is
+    # still running (e.g. Quit clicked while the launch is mid Sunshine
+    # restart) would be silently dropped - wait for it to finish first.
+    while ((Get-ScheduledTask -TaskName $script:TVElevatedTaskName).State -eq 'Running' -and (Get-Date) -lt $deadline) {
+        Start-Sleep -Milliseconds 500
+    }
+
+    Remove-Item $script:TVStatusPath -Force -ErrorAction SilentlyContinue
+    Set-Content -Path $script:TVActionFlagPath -Value $Action -Encoding ASCII -NoNewline
+    Start-ScheduledTask -TaskName $script:TVElevatedTaskName -ErrorAction Stop
+
+    while ((Get-Date) -lt $deadline) {
+        if (Test-Path $script:TVStatusPath) {
+            # The file can exist a moment before it's fully written, and is
+            # only trusted if it's the result of THIS action.
+            try {
+                $s = Get-Content $script:TVStatusPath -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+                if ($s.action -eq $Action) { return $s }
+            } catch { }
+        }
+        Start-Sleep -Milliseconds 500
+    }
+    return [pscustomobject]@{ action = $Action; success = $false; error = "The elevated '$Action' step didn't finish in time. Check Task Scheduler history for '$($script:TVElevatedTaskName)'." }
+}
+
+function Test-FileHasUtf8Bom {
+    param([Parameter(Mandatory)][string]$Path)
+    $fs = [System.IO.File]::OpenRead($Path)
+    try {
+        $b = New-Object byte[] 3
+        $n = $fs.Read($b, 0, 3)
+        return ($n -eq 3 -and $b[0] -eq 0xEF -and $b[1] -eq 0xBB -and $b[2] -eq 0xBF)
+    } finally { $fs.Dispose() }
+}
+
+function Set-MagpieDefaultScalingMode {
+    <# Changes only the default profile's "scalingMode" number in Magpie's
+       config, and writes it back as UTF-8 WITHOUT a byte-order mark.
+       Magpie's JSON parser rejects a BOM outright ("failed to parse config,
+       error 3") and then refuses to run - which is exactly what PowerShell
+       5.1's Set-Content -Encoding UTF8 silently caused before. Editing just
+       the one number (rather than a ConvertTo-Json round trip) also leaves
+       the rest of Magpie's file untouched. #>
+    param([Parameter(Mandatory)][string]$ConfigPath, [Parameter(Mandatory)][int]$Index)
+    $text = [System.IO.File]::ReadAllText($ConfigPath)   # drops a BOM if one is there
+    $profilesAt = $text.IndexOf('"profiles"')
+    if ($profilesAt -lt 0) { throw "Magpie's config has no profiles section." }
+    $m = ([regex]'"scalingMode"\s*:\s*-?\d+').Match($text, $profilesAt)
+    if (-not $m.Success) { throw "Magpie's default profile has no scalingMode." }
+    $replacement = $m.Value -replace '-?\d+$', "$Index"
+    $text = $text.Substring(0, $m.Index) + $replacement + $text.Substring($m.Index + $m.Length)
+    [System.IO.File]::WriteAllText($ConfigPath, $text, (New-Object System.Text.UTF8Encoding($false)))
+}
+
+function Get-MagpieWindows {
+    $magpie = Get-Process Magpie -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $magpie) { return @() }
+    return [TVMode]::GetAllTopLevelWindowsForProcess([uint32]$magpie.Id)
+}
+
+function Test-MagpieStartupFailed {
+    # A fatal startup problem leaves a standard error dialog as Magpie's
+    # only real window.
+    return [bool](Get-MagpieWindows | Where-Object { $_.ClassName -eq '#32770' })
+}
+
+function Wait-MagpieReady {
+    <# $true once Magpie is up and running normally (its main window and
+       its own tray icon exist - observed on a healthy start), $false if
+       it's stuck on an error dialog or didn't get there in time. #>
+    param([int]$TimeoutSeconds = 30)
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    do {
+        $wins = Get-MagpieWindows
+        if ($wins | Where-Object { $_.ClassName -eq '#32770' }) { return $false }
+        if ($wins | Where-Object { $_.ClassName -eq 'Magpie_Main' -or $_.ClassName -eq 'Magpie_NotifyIcon' }) { return $true }
+        if ($TimeoutSeconds -gt 0) { Start-Sleep -Milliseconds 500 }
+    } while ((Get-Date) -lt $deadline)
+    return $false
+}
+
+function Test-MagpieScalingOn {
+    <# Whether Magpie is actually upscaling onto the given monitor right now:
+       while it scales, Magpie shows its own full-monitor scaling window
+       (class Window_Magpie_<guid>) - confirmed live covering exactly the
+       virtual 4K display's bounds. #>
+    param([Parameter(Mandatory)]$Monitor)
+    return [bool](Get-MagpieWindows | Where-Object {
+        $_.Visible -and $_.ClassName -like 'Window_Magpie_*' -and
+        $_.Left -eq $Monitor.Left -and $_.Top -eq $Monitor.Top -and
+        $_.Right -eq $Monitor.Right -and $_.Bottom -eq $Monitor.Bottom
+    })
+}
+
+function Get-MagpieScaleHotkey {
+    <# Magpie's "scale" shortcut, read from its own config so a changed
+       shortcut keeps working. Magpie stores it as one number: the key's
+       virtual-key code in the low byte, plus 0x100 Win, 0x200 Ctrl,
+       0x400 Alt, 0x800 Shift - e.g. the default 2369 = 0x941 = Win+Shift+A
+       (and its default overlay shortcut 2372 = 0x944 = Win+Shift+D, which
+       confirms the bit layout). #>
+    $code = 2369
+    try {
+        $c = (Get-Content (Join-Path $env:LOCALAPPDATA 'Magpie\config\v2\config.json') -Raw | ConvertFrom-Json).shortcuts.scale
+        if ($c) { $code = [int]$c }
+    } catch { }
+    $keys = New-Object System.Collections.Generic.List[byte]
+    $mods = [uint32]0
+    if ($code -band 0x100) { $keys.Add([TVMode]::VK_LWIN);    $mods = $mods -bor [TVMode]::MOD_WIN }
+    if ($code -band 0x200) { $keys.Add([TVMode]::VK_CONTROL); $mods = $mods -bor [TVMode]::MOD_CONTROL }
+    if ($code -band 0x400) { $keys.Add([TVMode]::VK_MENU);    $mods = $mods -bor [TVMode]::MOD_ALT }
+    if ($code -band 0x800) { $keys.Add([TVMode]::VK_SHIFT);   $mods = $mods -bor [TVMode]::MOD_SHIFT }
+    $vk = [byte]($code -band 0xFF)
+    $keys.Add($vk)
+    return [pscustomobject]@{ Keys = $keys.ToArray(); Modifiers = $mods; Vk = [uint32]$vk }
+}
+
+function Test-MagpieListening {
+    <# Whether Magpie has actually registered its scale hotkey yet - its
+       windows exist a while before it does, and presses sent in that gap
+       are silently lost. #>
+    $hk = Get-MagpieScaleHotkey
+    return [TVMode]::IsHotkeyTaken($hk.Modifiers, $hk.Vk)
+}
+
+function Start-MagpieScaling {
+    <# Presses Magpie's scale hotkey for the given window, then confirms the
+       scaling window actually appeared. Never presses it when scaling is
+       already on, since the hotkey is a toggle. #>
+    param([Parameter(Mandatory)][IntPtr]$Hwnd, [Parameter(Mandatory)]$Monitor)
+    if (Test-MagpieScalingOn -Monitor $Monitor) { return $true }
+    # A scaling window that exists but isn't showing on the TV display
+    # means Magpie IS scaling, just not visibly - pressing the toggle now
+    # would switch it off, not on.
+    if (Get-MagpieWindows | Where-Object { $_.ClassName -like 'Window_Magpie_*' }) { return $false }
+    Assert-Focused -Hwnd $Hwnd
+    [TVMode]::SendKeyCombo((Get-MagpieScaleHotkey).Keys)
+    $deadline = (Get-Date).AddSeconds(5)
+    while ((Get-Date) -lt $deadline) {
+        Start-Sleep -Milliseconds 300
+        if (Test-MagpieScalingOn -Monitor $Monitor) { return $true }
+    }
+    return $false
+}
+
+function Get-BrowserWindowOnMonitor {
+    <# A default-browser window filling exactly the given monitor (i.e.
+       fullscreen on it), or $null. #>
+    param([Parameter(Mandatory)][string]$BrowserExe, [Parameter(Mandatory)]$Monitor)
+    $procs = Get-BrowserProcesses -ExePath $BrowserExe
+    if (-not $procs) { return $null }
+    $pidSet = New-Object 'System.Collections.Generic.HashSet[uint32]'
+    foreach ($p in $procs) { [void]$pidSet.Add([uint32]$p.Id) }
+    return [TVMode]::GetTopLevelWindowsForProcesses($pidSet) | Where-Object {
+        $_.Left -eq $Monitor.Left -and $_.Top -eq $Monitor.Top -and $_.Right -eq $Monitor.Right -and $_.Bottom -eq $Monitor.Bottom -and
+        -not [TVMode]::IsMinimized($_.Handle)
+    } | Select-Object -First 1
+}
+
+function Stop-TVModeHelperProcesses {
+    <# Hidden PowerShell processes running the given tools scripts (e.g. a
+       launch still in progress, or an F11 watcher and its prompt). #>
+    param([Parameter(Mandatory)][string[]]$ScriptNames)
+    Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" |
+        Where-Object { $cmd = $_.CommandLine; $_.ProcessId -ne $PID -and ($ScriptNames | Where-Object { $cmd -like "*$_*" }) } |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+}
 
 function Get-DefaultBrowserExe {
     <# Resolves Windows' actual default browser for https links - not
@@ -137,7 +316,12 @@ function Assert-Focused {
 function Move-WindowToVirtualDisplayAndFullscreen {
     <# Idempotent on purpose: F11 TOGGLES fullscreen, so a window that's
        already exactly on the virtual display is left alone rather than
-       having F11 (and Magpie's toggle) blindly re-sent to it. #>
+       having F11 blindly re-sent to it.
+
+       Deliberately does NOT turn Magpie's upscaling on: that's owned by
+       one place only - the tray process's watch loop (TVModeTray.ps1),
+       which confirms it took effect. Magpie's hotkey is a toggle, so two
+       things pressing it could switch it straight back off. #>
     param(
         [Parameter(Mandatory)][IntPtr]$Hwnd,
         [Parameter(Mandatory)]$Monitor
@@ -169,9 +353,6 @@ function Move-WindowToVirtualDisplayAndFullscreen {
     Assert-Focused -Hwnd $Hwnd
     [TVMode]::SendKeyCombo(@([TVMode]::VK_F11))
     Start-Sleep -Milliseconds 500
-    # Turn Magpie's upscaling on for this now-fullscreened, now-focused window.
-    Assert-Focused -Hwnd $Hwnd
-    [TVMode]::SendKeyCombo(@([TVMode]::VK_LWIN, [TVMode]::VK_SHIFT, [TVMode]::VK_A))
 }
 
 function Test-WindowIsFullscreenOnItsMonitor {

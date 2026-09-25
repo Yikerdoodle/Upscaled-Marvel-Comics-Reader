@@ -13,6 +13,16 @@ public static class TVMode {
         SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     }
 
+    // For creating WinForms UI: .NET Framework WinForms can't handle
+    // per-monitor DPI, but scales correctly (and renders sharp, not
+    // bitmap-stretched) when the thread is system-DPI-aware. A window keeps
+    // the awareness it was created with, so later EnsureDpiAware() calls
+    // on the same thread for geometry queries don't affect it.
+    private static readonly IntPtr DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = new IntPtr(-2);
+    public static void UseSystemDpiAwareness() {
+        SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT { public int Left, Top, Right, Bottom; }
 
@@ -137,6 +147,41 @@ public static class TVMode {
         return results;
     }
 
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+    public class WinDetail {
+        public IntPtr Handle;
+        public string ClassName;
+        public string Title;
+        public bool Visible;
+        public int Left, Top, Right, Bottom;
+    }
+
+    // Every top-level window of one process - visible or not, titled or
+    // not - with its window class, unlike GetTopLevelWindowsForProcesses.
+    // Used to spot Magpie's own scaling window, which is how "is Magpie
+    // actually upscaling right now" gets confirmed rather than assumed.
+    public static List<WinDetail> GetAllTopLevelWindowsForProcess(uint pid) {
+        EnsureDpiAware();
+        var results = new List<WinDetail>();
+        EnumWindows(delegate (IntPtr hWnd, IntPtr lParam) {
+            uint wpid;
+            GetWindowThreadProcessId(hWnd, out wpid);
+            if (wpid != pid) return true;
+            var cls = new StringBuilder(256);
+            GetClassName(hWnd, cls, cls.Capacity);
+            int len = GetWindowTextLength(hWnd);
+            var title = new StringBuilder(len + 1);
+            GetWindowText(hWnd, title, title.Capacity);
+            RECT r;
+            GetWindowRect(hWnd, out r);
+            results.Add(new WinDetail { Handle = hWnd, ClassName = cls.ToString(), Title = title.ToString(), Visible = IsWindowVisible(hWnd), Left = r.Left, Top = r.Top, Right = r.Right, Bottom = r.Bottom });
+            return true;
+        }, IntPtr.Zero);
+        return results;
+    }
+
     public static WinInfo GetForegroundWindowInfo() {
         EnsureDpiAware();
         IntPtr h = GetForegroundWindow();
@@ -249,9 +294,50 @@ public static class TVMode {
     public const byte VK_LWIN = 0x5B;
     public const byte VK_SHIFT = 0x10;
     public const byte VK_CONTROL = 0x11;
+    public const byte VK_MENU = 0x12;
     public const byte VK_F11 = 0x7A;
     public const byte VK_T = 0x54;
     public const byte VK_A = 0x41;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct LASTINPUTINFO { public uint cbSize; public uint dwTime; }
+
+    [DllImport("user32.dll")]
+    private static extern bool GetLastInputInfo(ref LASTINPUTINFO plii);
+
+    // Seconds since the last keyboard/mouse input anywhere on this PC
+    // (including input arriving through Sunshine/Moonlight).
+    public static double GetIdleSeconds() {
+        var lii = new LASTINPUTINFO();
+        lii.cbSize = (uint)Marshal.SizeOf(lii);
+        if (!GetLastInputInfo(ref lii)) return 0;
+        return unchecked((uint)Environment.TickCount - lii.dwTime) / 1000.0;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+
+    [DllImport("user32.dll")]
+    private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+    public const uint MOD_ALT = 0x1, MOD_CONTROL = 0x2, MOD_SHIFT = 0x4, MOD_WIN = 0x8;
+    private const uint MOD_NOREPEAT = 0x4000;
+    private const int ERROR_HOTKEY_ALREADY_REGISTERED = 1409;
+
+    // Whether some app currently holds this global hotkey. Windows has no
+    // "who owns this hotkey" query, so this briefly tries to register it
+    // and releases it straight away. Used to tell when Magpie is actually
+    // listening for its scale shortcut: a freshly started Magpie can have
+    // its windows up but not yet have registered the hotkey, and presses
+    // sent in that gap are silently lost (observed live).
+    public static bool IsHotkeyTaken(uint modifiers, uint vk) {
+        const int probeId = 0x7F01;
+        if (RegisterHotKey(IntPtr.Zero, probeId, modifiers | MOD_NOREPEAT, vk)) {
+            UnregisterHotKey(IntPtr.Zero, probeId);
+            return false;
+        }
+        return Marshal.GetLastWin32Error() == ERROR_HOTKEY_ALREADY_REGISTERED;
+    }
 
     public static void SendKeyCombo(byte[] vks) {
         foreach (var vk in vks) keybd_event(vk, 0, 0, UIntPtr.Zero);
