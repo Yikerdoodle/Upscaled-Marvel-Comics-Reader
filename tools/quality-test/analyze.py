@@ -233,6 +233,40 @@ for rname, box in DETAIL_REGIONS.items():
         print(f"{k:21}{bl:8.1f}{g:6d}{i:6d}{c:7.3f}")
     print()
 
+# Faces: small curved ink features (mouth, eyelids, hair tips) that
+# outline smoothing can shift or shrink. Shape change = ink area that moved,
+# appeared or vanished compared with the browser-only image, traced at 4x
+# sub-pixel precision (half-way between local ink and fill, so the browser's
+# blur doesn't move its edges), as % of the ink area.
+FACE_REGIONS = {"Mantis face": (1045, 250, 1130, 340), "Rock head": (1140, 225, 1200, 320), "Torch face": (540, 245, 605, 350)}
+
+def ink_mask(sub, up=4):
+    mn = ndimage.minimum_filter(sub, 9); mx = ndimage.maximum_filter(sub, 9)
+    mid = ndimage.gaussian_filter((mn + mx) / 2, 2)
+    valid = ndimage.zoom((mx - mn > 60) & (mn < 110), up, order=0)
+    return (ndimage.zoom(sub, up, order=3) < ndimage.zoom(mid, up, order=1)) & valid
+
+def shape_change(img, ref, box):
+    # A whole-image shift of up to half a pixel (NNEDI3 moves everything by
+    # ~0.14px) isn't a shape change: take the best alignment first.
+    x0, y0, x1, y1 = box
+    a, b = ink_mask(img[y0:y1, x0:x1]), ink_mask(ref[y0:y1, x0:x1])
+    m = 3
+    b = b[m:-m, m:-m]
+    best = min((a[m + dy:a.shape[0] - m + dy, m + dx:a.shape[1] - m + dx] ^ b).sum()
+               for dy in range(-2, 3) for dx in range(-2, 3))
+    return 100 * best / max(b.sum(), 1)
+
+print("== Faces: shape change vs browser (% of ink area moved/added/removed; lower = more faithful) ==")
+print(f"{'':13}" + "".join(f"{n[:12]:>13}" for n in FACE_REGIONS) + f"{'mean':>8}")
+for k, img in L.items():
+    vals = [shape_change(img, L[list(SHOTS)[0]], box) for box in FACE_REGIONS.values()]
+    for n, v in zip(FACE_REGIONS, vals):
+        ROWS[k][f"{n}|shape"] = v
+    ROWS[k]["Faces|shape"] = float(np.mean(vals))
+    print(f"{k:21}" + "".join(f"{v:13.1f}" for v in vals) + f"{np.mean(vals):8.1f}")
+print()
+
 import os, csv
 if os.environ.get("ANALYZE_CSV"):  # machine-readable copy of every number above
     cols = list(dict.fromkeys(c for r in ROWS.values() for c in r))
