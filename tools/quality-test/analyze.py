@@ -35,6 +35,7 @@ def luma(path):
     return 0.299 * a[..., 0] + 0.587 * a[..., 1] + 0.114 * a[..., 2]
 
 L = {k: luma(v) for k, v in SHOTS.items()}
+ROWS = {k: {"name": k, "file": v} for k, v in SHOTS.items()}  # everything measured, for ANALYZE_CSV
 
 def find_tracks(img, box, dark=80, light=140, min_len=30):
     x0, y0, x1, y1 = box
@@ -136,8 +137,18 @@ for rname, box in REGIONS.items():
                 rough += roughness(ys, lx) + roughness(ys, rx)
         rr = np.sqrt(np.mean(np.square(rough))); ww = np.median(widths)
         fn, _ = flat_noise(img, box, flat_mask)
+        ROWS[k].update({f"{rname}|{m}": v for m, v in zip(("rough", "width", "thick", "ink", "halo", "dkring"),
+                        (rr, ww, np.median(thick), np.median(cores), np.mean(halos), np.mean(rings)))})
         print(f"{k:21}{rr:7.3f}{ww:7.2f}{rr / ww:7.3f}{np.median(thick):7.2f}{np.median(cores):6.0f}{np.mean(halos):6.1f}{np.mean(rings):7.1f}{fn:7.2f}")
     print()
+
+import os, csv
+if os.environ.get("ANALYZE_CSV"):  # machine-readable copy of every number above
+    cols = list(dict.fromkeys(c for r in ROWS.values() for c in r))
+    with open(os.environ["ANALYZE_CSV"], "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, cols); w.writeheader(); w.writerows(ROWS.values())
+if os.environ.get("NO_PAIRS"):
+    sys.exit(0)
 
 print("== Mean absolute luma difference between each pair (whole panel) ==")
 x0, y0, x1, y1 = REGIONS["Whole panel"]
