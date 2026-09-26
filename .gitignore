@@ -14,5 +14,8 @@ tools/*.log
 tools/.tv-infra-status.json
 tools/.tv-mode-action
 
+# Quality-test screenshots - copyrighted comic art, kept local only.
+tools/quality-test/captures/
+
 __pycache__/
 *.pyc
