@@ -6,6 +6,8 @@
     - Scaling mode "AntiJaggy 8.5x NNEDI3x2+CASx2" is the active mode, and its
       effect chain matches the reference in magpie-scaling-modes-
       snapshot.json (restored from there if it's missing or was changed).
+      Parameter values are compared allowing for float rounding: Magpie
+      rewrites e.g. 0.8 as 0.800000011920929 when it exits normally.
       The TV launcher switches Magpie to "TV 4K", and nothing used to
       switch it back - so laptop reading silently ran the TV chain.
     - No ONNX model.json is active in the Magpie folder (the AI models
@@ -34,6 +36,32 @@ $MagpieDir = Join-Path $PSScriptRoot '..\Magpie'
 $MagpieExe = (Resolve-Path (Join-Path $MagpieDir 'Magpie.exe')).Path
 $GpuPrefKey = 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences'
 $HighPerformanceGpu = 'GpuPreference=2;'
+
+function Test-SameScalingMode($a, $b) {
+    # Same effects in the same order with the same settings. Numbers only
+    # need to agree to 1e-4: Magpie stores parameters as 32-bit floats.
+    if ($a.name -ne $b.name -or @($a.effects).Count -ne @($b.effects).Count) { return $false }
+    for ($i = 0; $i -lt @($a.effects).Count; $i++) {
+        $x = @($a.effects)[$i]; $y = @($b.effects)[$i]
+        foreach ($key in @('name', 'scalingType', 'scale', 'parameters')) {
+            $u = $x.$key; $v = $y.$key
+            if ($null -eq $u -and $null -eq $v) { continue }
+            if ($null -eq $u -or $null -eq $v) { return $false }
+            if ($u -is [string] -or $u -is [ValueType]) {
+                if ($u -is [string]) { if ($u -ne $v) { return $false } }
+                elseif ([math]::Abs([double]$u - [double]$v) -gt 1e-4) { return $false }
+                continue
+            }
+            $pu = @($u.PSObject.Properties); $pv = @($v.PSObject.Properties)
+            if ($pu.Count -ne $pv.Count) { return $false }
+            foreach ($p in $pu) {
+                $q = $v.PSObject.Properties[$p.Name]
+                if (-not $q -or [math]::Abs([double]$p.Value - [double]$q.Value) -gt 1e-4) { return $false }
+            }
+        }
+    }
+    return $true
+}
 
 function Show-LaptopModeWarning($message) {
     [System.Windows.Forms.MessageBox]::Show($message, 'Read Marvel Comics - Laptop Mode', 'OK', 'Warning') | Out-Null
@@ -68,8 +96,7 @@ if (-not $reference) {
 $cfg = Get-Content $ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $index = -1
 for ($i = 0; $i -lt $cfg.scalingModes.Count; $i++) { if ($cfg.scalingModes[$i].name -eq $ModeName) { $index = $i; break } }
-$chainOk = $index -ge 0 -and
-    (($cfg.scalingModes[$index] | ConvertTo-Json -Depth 20 -Compress) -eq ($reference | ConvertTo-Json -Depth 20 -Compress))
+$chainOk = $index -ge 0 -and (Test-SameScalingMode $cfg.scalingModes[$index] $reference)
 $modeActive = $index -ge 0 -and $cfg.profiles[0].scalingMode -eq $index
 $hasBom = Test-FileHasUtf8Bom $ConfigPath
 
