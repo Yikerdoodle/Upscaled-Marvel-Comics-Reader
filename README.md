@@ -14,8 +14,21 @@ clock as usual; right-click it for Settings or Exit.
 Then: Firefox **fullscreen** (F11) -> click the Firefox window ->
 **Win+Shift+A** to toggle upscaling on/off, so you can compare.
 
+Before starting Magpie, the launcher checks Magpie is on the best laptop
+settings (the chain below, GPU pinned to the GTX 1650, no AI model) and
+quietly fixes anything that isn't - e.g. after 4K TV mode switched it.
+
 (`START-COMIC-MODE.bat` still exists and does the same launch, but shows
 a console window with instructions text. The .vbs is silent.)
+
+**Reading on the living-room TV** instead: `tools\Read Marvel Comics
+Upscaled - 4K TV Mode.vbs` - see [`4K-TV-Setup/README.md`](4K-TV-Setup/README.md).
+
+## Which upscaling looks best
+
+See **[UPSCALING-RANKINGS.md](UPSCALING-RANKINGS.md)**: every chain tried
+on older Marvel comics, ranked best to worst, with the measurements and
+the reasons.
 
 ## The pipeline - shader chain, not an ONNX model
 
