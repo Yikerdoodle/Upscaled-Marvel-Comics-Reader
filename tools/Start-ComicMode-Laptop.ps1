@@ -60,12 +60,12 @@ $modelJson = Join-Path $MagpieDir 'model.json'
 $modelActive = Test-Path $modelJson
 
 # --- Scaling mode: present, matching the reference, and active ---
-$reference = (Get-Content $ReferencePath -Raw | ConvertFrom-Json).scalingModes | Where-Object { $_.name -eq $ModeName } | Select-Object -First 1
+$reference = (Get-Content $ReferencePath -Raw -Encoding UTF8 | ConvertFrom-Json).scalingModes | Where-Object { $_.name -eq $ModeName } | Select-Object -First 1
 if (-not $reference) {
     Show-LaptopModeWarning "The reference settings file doesn't contain '$ModeName'. Nothing was changed."
     exit 1
 }
-$cfg = Get-Content $ConfigPath -Raw | ConvertFrom-Json
+$cfg = Get-Content $ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $index = -1
 for ($i = 0; $i -lt $cfg.scalingModes.Count; $i++) { if ($cfg.scalingModes[$i].name -eq $ModeName) { $index = $i; break } }
 $chainOk = $index -ge 0 -and
@@ -102,7 +102,7 @@ if ($modelActive -or -not $chainOk -or -not $modeActive -or $hasBom) {
         $changes.Add("'$ModeName' made active")
     }
 
-    $verify = Get-Content $ConfigPath -Raw | ConvertFrom-Json
+    $verify = Get-Content $ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($verify.scalingModes[$verify.profiles[0].scalingMode].name -ne $ModeName -or (Test-FileHasUtf8Bom $ConfigPath)) {
         Show-LaptopModeWarning "Tried to switch Magpie to '$ModeName', but it didn't stick on readback."
         exit 1
