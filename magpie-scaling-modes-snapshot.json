@@ -1185,6 +1185,60 @@
                                                            }
                                              }
                                          ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x InkContour G4",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "Custom\\InkContour",
+                                                 "parameters":  {
+                                                                    "sigma":  3.0,
+                                                                    "sigmaFine":  1.2,
+                                                                    "keepContrast":  0.8,
+                                                                    "edgeWidth":  3.0,
+                                                                    "inkDarken":  0.8,
+                                                                    "legacyLook":  0,
+                                                                    "fineRedraw":  0,
+                                                                    "curveRadius":  6,
+                                                                    "inkOnly":  0.2
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "CAS\\CAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  0.5
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "CAS\\CAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  0.5
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
                          }
                      ],
     "profiles":  [
