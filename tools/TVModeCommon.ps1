@@ -148,7 +148,7 @@ function Start-MagpieScaling {
     <# Presses Magpie's scale hotkey for the given window, then confirms the
        scaling window actually appeared. Never presses it when scaling is
        already on, since the hotkey is a toggle. #>
-    param([Parameter(Mandatory)][IntPtr]$Hwnd, [Parameter(Mandatory)]$Monitor)
+    param([Parameter(Mandatory)][IntPtr]$Hwnd, [Parameter(Mandatory)]$Monitor, [int]$TimeoutSeconds = 5)
     if (Test-MagpieScalingOn -Monitor $Monitor) { return $true }
     # A scaling window that exists but isn't showing on the TV display
     # means Magpie IS scaling, just not visibly - pressing the toggle now
@@ -156,7 +156,7 @@ function Start-MagpieScaling {
     if (Get-MagpieWindows | Where-Object { $_.ClassName -like 'Window_Magpie_*' }) { return $false }
     Assert-Focused -Hwnd $Hwnd
     [TVMode]::SendKeyCombo((Get-MagpieScaleHotkey).Keys)
-    $deadline = (Get-Date).AddSeconds(5)
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
         Start-Sleep -Milliseconds 300
         if (Test-MagpieScalingOn -Monitor $Monitor) { return $true }
