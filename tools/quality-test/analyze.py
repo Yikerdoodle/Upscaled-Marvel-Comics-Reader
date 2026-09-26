@@ -171,6 +171,37 @@ for k, img in L.items():
     print(f"{k:21}{h.mean():7.2f}  (edges with a visible 3+ level halo: {100 * (h >= 3).mean():5.1f}%)")
 print()
 
+# Fine lines: the thinnest traced lines (under 3.2px wide in the reference).
+# Thinning lines too far makes these jaggy first: their edges wobble
+# (rough), their core can't reach full black (core) and its darkness pulses
+# along the line as it crosses the pixel grid (roping).
+all_tracks = find_tracks(L[REF], REGIONS["Whole panel"])
+def track_thickness(img, t):
+    th = [r["R"][0] - r["L"][0] for r in (trace_row(img, y, c) for y, c in t) if r]
+    return np.median(th) if th else np.nan
+fine_tracks = [t for t in all_tracks if track_thickness(L[REF], t) < 3.2]
+print(f"== Fine lines: {len(fine_tracks)} traced lines under 3.2px wide ==")
+print(f"{'':13}{'rough':>7}{'thick':>7}{'core':>6}{'roping':>8}")
+for k, img in L.items():
+    rough, thick, cores, roping = [], [], [], []
+    for t in fine_tracks:
+        ys, lx, rx, cs = [], [], [], []
+        for (y, c) in t:
+            r = trace_row(img, y, c)
+            if r is None: continue
+            ys.append(y); lx.append(r["L"][0]); rx.append(r["R"][0]); cs.append(r["core"])
+            thick.append(r["R"][0] - r["L"][0])
+        if len(ys) >= 25:
+            rough += roughness(ys, lx) + roughness(ys, rx)
+            cs = np.asarray(cs)
+            # pulsing = row-to-row change of the core darkness along the line
+            roping.append(np.abs(np.diff(cs)).mean()); cores.append(np.median(cs))
+    rr = np.sqrt(np.mean(np.square(rough))) if rough else np.nan
+    vals = (rr, np.median(thick) if thick else np.nan, np.median(cores) if cores else np.nan, np.mean(roping) if roping else np.nan)
+    ROWS[k].update({f"Fine lines|{m}": v for m, v in zip(("rough", "thick", "core", "roping"), vals)})
+    print(f"{k:21}{vals[0]:7.3f}{vals[1]:7.2f}{vals[2]:6.0f}{vals[3]:8.2f}")
+print()
+
 import os, csv
 if os.environ.get("ANALYZE_CSV"):  # machine-readable copy of every number above
     cols = list(dict.fromkeys(c for r in ROWS.values() for c in r))
