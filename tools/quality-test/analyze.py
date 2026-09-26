@@ -28,7 +28,27 @@ import sys
 IMG = Path(__file__).parent / "captures"
 SHOTS = dict(a.split("=", 1) for a in sys.argv[1:])  # e.g. Browser=cap_Browser.png NoSharp=cap_NoSharp.png ...
 REF = list(SHOTS)[1] if len(SHOTS) > 1 else list(SHOTS)[0]  # outlines are found on the first upscaled image
-REGIONS = {"Mantis legs": (1000, 600, 1130, 1040), "Mantis neckline": (1000, 320, 1130, 480), "Whole panel": (430, 180, 1495, 1070)}
+
+# Test panels (screen coordinates on the 1920x1080 laptop screen, panel
+# fullscreen). Pick with ANALYZE_PANEL=... (default: mantis).
+PANELS = {
+    # Fantastic Four #323, Mantis and the Thing walking.
+    "mantis": dict(
+        regions={"Mantis legs": (1000, 600, 1130, 1040), "Mantis neckline": (1000, 320, 1130, 480), "Whole panel": (430, 180, 1495, 1070)},
+        detail={"Thing rock texture": (700, 590, 900, 930), "Torch hatching": (480, 290, 620, 500)},
+        faces={"Mantis face": (1045, 250, 1130, 340), "Rock head": (1140, 225, 1200, 320), "Torch face": (540, 245, 605, 350)}),
+    # "And the word would be death" panel: hooded man with a yellow face,
+    # red-haired woman, rubble. Small features the reader noticed moving:
+    # his mouth lines and eyelid, the top outline of her hair.
+    "death": dict(
+        regions={"Whole panel": (622, 0, 1298, 1080)},
+        detail={"Rubble hatching": (740, 360, 900, 700), "Lettering": (905, 450, 1295, 595)},
+        faces={"His mouth": (960, 920, 1080, 1030), "His eye": (1060, 870, 1140, 950), "His face": (930, 840, 1180, 1070),
+               "Her hair": (645, 675, 760, 740), "Her face": (660, 700, 740, 790), "Lettering": (905, 450, 1295, 595)}),
+}
+import os
+PANEL = PANELS[os.environ.get("ANALYZE_PANEL", "mantis")]
+REGIONS = PANEL["regions"]
 
 def luma(path):
     a = np.asarray(Image.open(IMG / path).convert("RGB"), dtype=np.float64)
@@ -205,7 +225,7 @@ print()
 from scipy import ndimage
 
 # Busy areas where smoothing can merge nearby shapes: fine detail survival.
-DETAIL_REGIONS = {"Thing rock texture": (700, 590, 900, 930), "Torch hatching": (480, 290, 620, 500)}
+DETAIL_REGIONS = PANEL["detail"]
 
 def detail_stats(img, ref, box):
     x0, y0, x1, y1 = box
@@ -238,7 +258,7 @@ for rname, box in DETAIL_REGIONS.items():
 # appeared or vanished compared with the browser-only image, traced at 4x
 # sub-pixel precision (half-way between local ink and fill, so the browser's
 # blur doesn't move its edges), as % of the ink area.
-FACE_REGIONS = {"Mantis face": (1045, 250, 1130, 340), "Rock head": (1140, 225, 1200, 320), "Torch face": (540, 245, 605, 350)}
+FACE_REGIONS = PANEL["faces"]
 
 def ink_mask(sub, up=4):
     mn = ndimage.minimum_filter(sub, 9); mx = ndimage.maximum_filter(sub, 9)
