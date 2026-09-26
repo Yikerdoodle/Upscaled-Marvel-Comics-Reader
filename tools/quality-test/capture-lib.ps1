@@ -47,7 +47,7 @@ function Capture-Upscaled([string]$name, [int]$settleSeconds = 6) {
     $w = Get-ComicWindow
     if (-not $w) { throw "No fullscreen '$script:ComicTitle' window on the laptop screen." }
     $mon = Get-LaptopMonitor
-    if (-not (Start-MagpieScaling -Hwnd $w.Handle -Monitor $mon)) { throw "Upscaling didn't start for '$name'" }
+    if (-not (Start-MagpieScaling -Hwnd $w.Handle -Monitor $mon -TimeoutSeconds 120)) { throw "Upscaling didn't start for '$name'" }
     Start-Sleep -Seconds $settleSeconds
     $path = Save-Screen $name
     Assert-Focused -Hwnd $w.Handle
