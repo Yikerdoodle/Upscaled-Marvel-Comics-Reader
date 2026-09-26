@@ -122,7 +122,7 @@ function Get-MagpieScaleHotkey {
        confirms the bit layout). #>
     $code = 2369
     try {
-        $c = (Get-Content (Join-Path $env:LOCALAPPDATA 'Magpie\config\v2\config.json') -Raw | ConvertFrom-Json).shortcuts.scale
+        $c = (Get-Content (Join-Path $env:LOCALAPPDATA 'Magpie\config\v2\config.json') -Raw -Encoding UTF8 | ConvertFrom-Json).shortcuts.scale
         if ($c) { $code = [int]$c }
     } catch { }
     $keys = New-Object System.Collections.Generic.List[byte]
