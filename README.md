@@ -17,6 +17,8 @@ Then: Firefox **fullscreen** (F11) -> click the Firefox window ->
 Before starting Magpie, the launcher checks Magpie is on the best laptop
 settings (the chain below, GPU pinned to the GTX 1650, no AI model) and
 quietly fixes anything that isn't - e.g. after 4K TV mode switched it.
+Other favourites stay in Magpie's mode list as "★ Liked ..." to try by
+hand.
 
 (`START-COMIC-MODE.bat` still exists and does the same launch, but shows
 a console window with instructions text. The .vbs is silent.)
@@ -39,14 +41,16 @@ on Marvel's already-clean remastered line art - it's built to *add*
 contrast, which shows up as a bright rim around ink lines. Rejected on
 sight; not used in the current recipe.
 
-Current chain ("AntiJaggy 8.5x NNEDI3x2+CASx2" - see
+Current chain ("AntiJaggy 8.5x InkContour G4" - see
 `magpie-scaling-modes-snapshot.json` for the exact JSON):
 
     Firefox fullscreen (1920x1080 captured)
       -> Denoise (Anime4K Bilateral Mode, intensitySigma 0.22)
       -> Restore (Anime4K_Restore_Soft_UL - largest non-GAN line-restore
                    network Magpie ships)
-      -> NNEDI3 2x (nns128, win8x4) -> CAS (sharpness 0.5)
+      -> NNEDI3 2x (nns128, win8x4)
+      -> InkContour (custom shader, Magpie/effects/Custom/InkContour.hlsl)
+      -> CAS (sharpness 0.5)
       -> NNEDI3 2x                  -> CAS (sharpness 0.5)
       -> Lanczos 2.125x (explicit scale, cheap final step)
       = 8.5x total supersample -> 16320x9180 -> fit back to 1920x1080
@@ -55,8 +59,18 @@ Why NNEDI3 + CAS rather than Anime4K's upscalers: these old pages have
 hard, slightly stair-stepped line art, and Anime4K's upscalers sharpen
 those steps along with everything else. NNEDI3 interpolates *along* each
 line's direction, so the steps become small and even; CAS then restores
-edge contrast without overshooting into halos. Full reasoning and numbers
-in [UPSCALING-RANKINGS.md](UPSCALING-RANKINGS.md).
+edge contrast without overshooting into halos.
+
+InkContour is a small real-time "vectorizer" for the ink outlines: it
+finds the smooth path each outline follows (the half-way level of a
+blurred copy) and redraws the edge along it, from the local ink colour
+to the local fill colour, with solid ink deepened towards black. Settings
+in this chain: smoothing 3px, edge width 3px (at 2x), and three guards
+that keep it from changing the drawing - detail protection (skip spots
+where smoothing would merge nearby shapes), fine features left untouched,
+and curve protection (original pixels kept wherever an outline bends
+tighter than 6px: mouths, eyelids, stroke ends, hair tips, lettering).
+Full reasoning and numbers in [UPSCALING-RANKINGS.md](UPSCALING-RANKINGS.md).
 
 Fullscreen is deliberate. Magpie captures the *rendered window*, so
 shrinking Firefox would throw away Marvel's real pixels before any shader
