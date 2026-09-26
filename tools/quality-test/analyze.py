@@ -202,6 +202,37 @@ for k, img in L.items():
     print(f"{k:21}{vals[0]:7.3f}{vals[1]:7.2f}{vals[2]:6.0f}{vals[3]:8.2f}")
 print()
 
+from scipy import ndimage
+
+# Busy areas where smoothing can merge nearby shapes: fine detail survival.
+DETAIL_REGIONS = {"Thing rock texture": (700, 590, 900, 930), "Torch hatching": (480, 290, 620, 500)}
+
+def detail_stats(img, ref, box):
+    x0, y0, x1, y1 = box
+    sub = img[y0:y1, x0:x1]
+    black = (sub < 45).mean() * 100
+    def count(mask):
+        lab, n = ndimage.label(mask)
+        return int((np.bincount(lab.ravel())[1:] >= 6).sum()) if n else 0
+    gaps, inks = count(sub > 110), count(sub < 70)
+    # Structure match: band-pass (texture-scale) correlation with the
+    # browser-only image, which has the true shapes, just blurrier.
+    bp = lambda a: ndimage.gaussian_filter(a, 1.0) - ndimage.gaussian_filter(a, 4.0)
+    s, r = bp(sub), bp(ref[y0:y1, x0:x1])
+    corr = np.corrcoef(s.ravel(), r.ravel())[0, 1]
+    return black, gaps, inks, corr
+
+print("== Fine detail: black% (merging into solid black, lower = less), light gaps / ink shapes"
+      " still separate (higher = more detail), structure match with browser (1 = same shapes) ==")
+for rname, box in DETAIL_REGIONS.items():
+    print(f"-- {rname} --")
+    print(f"{'':13}{'black%':>8}{'gaps':>6}{'inks':>6}{'match':>7}")
+    for k, img in L.items():
+        bl, g, i, c = detail_stats(img, L[list(SHOTS)[0]], box)
+        ROWS[k].update({f"{rname}|black%": bl, f"{rname}|gaps": g, f"{rname}|inks": i, f"{rname}|match": c})
+        print(f"{k:21}{bl:8.1f}{g:6d}{i:6d}{c:7.3f}")
+    print()
+
 import os, csv
 if os.environ.get("ANALYZE_CSV"):  # machine-readable copy of every number above
     cols = list(dict.fromkeys(c for r in ROWS.values() for c in r))
