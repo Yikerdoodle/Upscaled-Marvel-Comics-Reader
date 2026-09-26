@@ -84,6 +84,7 @@ def trace_row(img, y, center):
         e = int(round(p80))
         near = row[e + d: e + 4 * d: d] if d > 0 else row[e - 3:e]
         ring = row[e + 2 * d: e + 5 * d: d] if d > 0 else row[e - 4:e - 1]
+        if near.size == 0 or ring.size == 0: return None
         res[name] = (p50, abs(p80 - p20), max(0.0, near.max() - plain), max(0.0, plain - ring.min()))
     return res
 
