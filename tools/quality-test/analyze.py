@@ -142,6 +142,35 @@ for rname, box in REGIONS.items():
         print(f"{k:21}{rr:7.3f}{ww:7.2f}{rr / ww:7.3f}{np.median(thick):7.2f}{np.median(cores):6.0f}{np.mean(halos):6.1f}{np.mean(rings):7.1f}{fn:7.2f}")
     print()
 
+# Strict halo: only ink edges with truly flat colour beside them (so JPEG
+# noise and busy areas can't count as "halo"), and how much brighter the
+# 5px right next to the ink get than that flat colour. The per-outline
+# "halo" above can be fooled by uneven surroundings; this one can't.
+def strict_halo_sites(ref, box):
+    x0, y0, x1, y1 = box
+    ys, xs, ds = [], [], []
+    for y in range(y0, y1):
+        row = ref[y]
+        for x in range(x0 + 16, x1 - 16):
+            for d in (1, -1):
+                if row[x] < 60 and row[x + d] >= 60:
+                    plain = row[x + 6 * d: x + 15 * d: d]
+                    if plain.mean() > 100 and plain.std() < 4:
+                        ys.append(y); xs.append(x); ds.append(d)
+    return np.array(ys), np.array(xs), np.array(ds)
+
+hy, hx, hd = strict_halo_sites(L[REF], REGIONS["Whole panel"])
+near_idx = hx[:, None] + hd[:, None] * np.arange(1, 6)[None, :]
+plain_idx = hx[:, None] + hd[:, None] * np.arange(6, 15)[None, :]
+print(f"== Strict halo: {len(hy)} ink edges beside flat colour (brightest of the 5px next to the ink"
+      " minus the flat colour; 0 = no halo) ==")
+for k, img in L.items():
+    over = img[hy[:, None], near_idx].max(1) - img[hy[:, None], plain_idx].mean(1)
+    h = np.clip(over, 0, None)
+    ROWS[k]["Whole panel|halo_strict"] = h.mean()
+    print(f"{k:21}{h.mean():7.2f}  (edges with a visible 3+ level halo: {100 * (h >= 3).mean():5.1f}%)")
+print()
+
 import os, csv
 if os.environ.get("ANALYZE_CSV"):  # machine-readable copy of every number above
     cols = list(dict.fromkeys(c for r in ROWS.values() for c in r))
