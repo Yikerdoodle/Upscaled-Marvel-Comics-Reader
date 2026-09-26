@@ -39,30 +39,42 @@ on Marvel's already-clean remastered line art - it's built to *add*
 contrast, which shows up as a bright rim around ink lines. Rejected on
 sight; not used in the current recipe.
 
-Current chain ("AntiJaggy 8x Clean" - see
+Current chain ("AntiJaggy 8.5x NNEDI3x2+CASx2" - see
 `magpie-scaling-modes-snapshot.json` for the exact JSON):
 
     Firefox fullscreen (1920x1080 captured)
-      -> Denoise (Anime4K Bilateral Mode, intensitySigma 0.12-0.16)
+      -> Denoise (Anime4K Bilateral Mode, intensitySigma 0.22)
       -> Restore (Anime4K_Restore_Soft_UL - largest non-GAN line-restore
                    network Magpie ships)
-      -> Upscale 2x (Anime4K_Upscale_UL) -> SMAA_Ultra
-      -> Upscale 2x (Anime4K_Upscale_UL) -> SMAA_Ultra
-      -> Lanczos 2x (explicit scale, cheap final step)
-      = 8x total supersample -> 15360x8640 -> fit back to 1920x1080
+      -> NNEDI3 2x (nns128, win8x4) -> CAS (sharpness 0.5)
+      -> NNEDI3 2x                  -> CAS (sharpness 0.5)
+      -> Lanczos 2.125x (explicit scale, cheap final step)
+      = 8.5x total supersample -> 16320x9180 -> fit back to 1920x1080
+
+Why NNEDI3 + CAS rather than Anime4K's upscalers: these old pages have
+hard, slightly stair-stepped line art, and Anime4K's upscalers sharpen
+those steps along with everything else. NNEDI3 interpolates *along* each
+line's direction, so the steps become small and even; CAS then restores
+edge contrast without overshooting into halos. Full reasoning and numbers
+in [UPSCALING-RANKINGS.md](UPSCALING-RANKINGS.md).
 
 Fullscreen is deliberate. Magpie captures the *rendered window*, so
 shrinking Firefox would throw away Marvel's real pixels before any shader
 sees them - the opposite of what an early version of this project did.
 
-Why 8x and not more: Direct3D 11 caps a single texture at 16384px per
+Why 8.5x and not more: Direct3D 11 caps a single texture at 16384px per
 side. 1920 * 8.53 = 16384 exactly, so **8.5x is the hard mathematical
 ceiling for this screen, on any GPU** - not a VRAM limit, a fixed API
 limit. Confirmed by actually hitting it: a 10x attempt (19200px wide)
 failed instantly with `CreateTexture2D` HRESULT 0x80070057 ("parameter is
-incorrect"), logged in `Magpie/logs/`. 8.5x runs with only ~64px of
-margin under that wall - a real but calculated risk taken once, on
-request; 8x (15360px, ~1000px of margin) is the safer default.
+incorrect"), logged in `Magpie/logs/`. 8.5x runs with ~64px of margin
+under that wall.
+
+Memory: if the PC is nearly out of memory (RAM + page file), heavy chains
+can fail to start with `CreateTexture2D` HRESULT 0x8007000E (out of
+memory) in Magpie's log, even with the GPU's own memory free. The NNEDI3
+chain is lighter than the old Anime4K-only one, but closing big browser
+tabs or `wsl --shutdown` helps if upscaling silently won't start.
 
 Why this over more resolution or a bigger model: two specific defects
 kept surfacing on close, parallel thin lines (crosshatching, shading) -
