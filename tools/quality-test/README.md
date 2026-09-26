@@ -18,6 +18,9 @@ Each capture restarts Magpie in the named mode (closing it first, since
 Magpie reverts config edits made while it runs), turns upscaling on over
 the comic, waits for it to render, saves a lossless PNG to `captures/`,
 and turns upscaling off again. Hands off the laptop while it runs.
+Captures refuse to run unless the fullscreen window's title matches
+`$ComicTitle` in `capture-lib.ps1` (Fantastic Four #323), so a different
+comic can't slip into the set by accident.
 Capture every chain you want to compare in **one session** - numbers from
 different sessions or lossy screenshots aren't directly comparable.
 

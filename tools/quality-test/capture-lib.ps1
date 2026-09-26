@@ -8,11 +8,14 @@ $script:OutDir = Join-Path $PSScriptRoot 'captures'; New-Item -ItemType Director
 
 function Get-LaptopMonitor { [TVMode]::GetMonitors() | Where-Object { $_.Primary } | Select-Object -First 1 }
 
+# Every capture must be of the same page, or numbers aren't comparable.
+$script:ComicTitle = 'Fantastic Four (1961) #323*'
+
 function Get-ComicWindow {
     $procs = Get-BrowserProcesses -ExePath (Get-DefaultBrowserExe)
     $pidSet = New-Object 'System.Collections.Generic.HashSet[uint32]'; foreach ($p in $procs) { [void]$pidSet.Add([uint32]$p.Id) }
     $mon = Get-LaptopMonitor
-    [TVMode]::GetTopLevelWindowsForProcesses($pidSet) | Where-Object { $_.Left -eq $mon.Left -and $_.Top -eq $mon.Top -and $_.Right -eq $mon.Right -and $_.Bottom -eq $mon.Bottom } | Select-Object -First 1
+    [TVMode]::GetTopLevelWindowsForProcesses($pidSet) | Where-Object { $_.Left -eq $mon.Left -and $_.Top -eq $mon.Top -and $_.Right -eq $mon.Right -and $_.Bottom -eq $mon.Bottom -and $_.Title -like $script:ComicTitle } | Select-Object -First 1
 }
 
 function Save-Screen([string]$name) {
@@ -42,7 +45,7 @@ function Restart-MagpieInMode([string]$modeName) {
 # Upscale the comic window, wait for it to render, capture, switch upscaling off.
 function Capture-Upscaled([string]$name, [int]$settleSeconds = 6) {
     $w = Get-ComicWindow
-    if (-not $w) { throw 'Comic window is not fullscreen on the laptop screen.' }
+    if (-not $w) { throw "No fullscreen '$script:ComicTitle' window on the laptop screen." }
     $mon = Get-LaptopMonitor
     if (-not (Start-MagpieScaling -Hwnd $w.Handle -Monitor $mon)) { throw "Upscaling didn't start for '$name'" }
     Start-Sleep -Seconds $settleSeconds
