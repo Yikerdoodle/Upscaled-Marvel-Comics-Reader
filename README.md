@@ -90,6 +90,9 @@ turn up.
         effects\                    bundled HLSL shaders (SMAA, Anime4K, ...)
         *.onnx, model.json.*        both currently INACTIVE - see below
       tools\                       launchers + diagnostic probes
+        quality-test\                capture + measure upscaling chains
+      4K-TV-Setup\                 Sunshine / virtual 4K display setup for the TV
+      UPSCALING-RANKINGS.md        which chains look best, and why
       models\                      source .pth weights (for convert.py)
       out\                         converted .onnx (fp32 + fp16)
       vector-test\, skeleton-test\  offline vectorization experiments
