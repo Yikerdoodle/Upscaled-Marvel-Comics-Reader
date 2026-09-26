@@ -116,7 +116,7 @@ for dy, dx in itertools.product(range(-4, 5), repeat=2):
     dil |= np.roll(np.roll(edge, dy, 0), dx, 1)
 flat_mask = ~dil
 
-print("Screens: 1920x1080 each. Tracks found on NoSharp, traced identically in all.\n")
+print(f"Screens: 1920x1080 each. Tracks found on {REF}, traced identically in all.\n")
 for rname, box in REGIONS.items():
     tracks = find_tracks(L[REF], box)
     print(f"== {rname}: {len(tracks)} ink-outline tracks, {sum(len(t) for t in tracks)} outline rows ==")
