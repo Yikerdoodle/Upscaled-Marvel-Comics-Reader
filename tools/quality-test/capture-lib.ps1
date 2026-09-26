@@ -32,7 +32,7 @@ function Save-Screen([string]$name) {
 
 function Restart-MagpieInMode([string]$modeName) {
     $running = @(Get-Process Magpie -ErrorAction SilentlyContinue); $running | Stop-Process -Force; foreach ($p in $running) { $p.WaitForExit(10000) | Out-Null }
-    $cfg = Get-Content $script:CfgPath -Raw | ConvertFrom-Json
+    $cfg = Get-Content $script:CfgPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $idx = [array]::IndexOf(($cfg.scalingModes | ForEach-Object { $_.name }), $modeName)
     if ($idx -lt 0) { throw "No mode named '$modeName'" }
     Set-MagpieDefaultScalingMode -ConfigPath $script:CfgPath -Index $idx
