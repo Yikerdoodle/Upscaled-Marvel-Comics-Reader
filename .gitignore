@@ -19,3 +19,7 @@ tools/quality-test/captures/
 
 __pycache__/
 *.pyc
+
+# Extracted copy of the VDD Control app (163 MB, over GitHub's 100 MB limit).
+# The same file is inside the committed 4K-TV-Setup/VDD.Control.25.7.23.zip.
+4K-TV-Setup/VDD-Control/VDD Control.exe
