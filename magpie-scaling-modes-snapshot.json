@@ -557,9 +557,9 @@
                                                  "name":  "Sharpen\\LumaSharpen",
                                                  "parameters":  {
                                                                     "offsetBias":  1.0,
-                                                                    "sharpStrength":  0.30000001192092896,
+                                                                    "pattern":  1.0,
                                                                     "sharpClamp":  0.019999999552965164,
-                                                                    "pattern":  1.0
+                                                                    "sharpStrength":  0.30000001192092896
                                                                 }
                                              }
                                          ]
@@ -600,9 +600,9 @@
                                                  "name":  "Sharpen\\LumaSharpen",
                                                  "parameters":  {
                                                                     "offsetBias":  1.0,
-                                                                    "pattern":  1.0,
+                                                                    "sharpStrength":  0.20000000298023224,
                                                                     "sharpClamp":  0.009999999776482582,
-                                                                    "sharpStrength":  0.20000000298023224
+                                                                    "pattern":  1.0
                                                                 }
                                              }
                                          ]
@@ -719,7 +719,7 @@
                                              {
                                                  "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
                                                  "parameters":  {
-                                                                    "intensitySigma":  0.22
+                                                                    "intensitySigma":  0.2199999988079071
                                                                 }
                                              },
                                              {
@@ -738,11 +738,458 @@
                                                  "name":  "SMAA\\SMAA_Ultra"
                                              }
                                          ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x PreAA",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NNEDI3",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x PreAA+NNEDI3",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NNEDI3\u003eRestore",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NNEDI3\u003eRestore x2",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NNEDI3\u003eRestoreStrong",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NNEDI3+CAS",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "CAS\\CAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  0.5
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NNEDI3+CAS late",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "CAS\\CAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  0.5
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NNEDI3+CAS1.0",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "CAS\\CAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  1
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Upscale_UL"
+                                             },
+                                             {
+                                                 "name":  "SMAA\\SMAA_Ultra"
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NNEDI3x2+CASx2",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "CAS\\CAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  0.5
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "CAS\\CAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  0.5
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NNEDI3x2+CASx2 1.0",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "CAS\\CAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  1
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "CAS\\CAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  1
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
+                         },
+                         {
+                             "name":  "AntiJaggy 8.5x NNEDI3x2+CAS end",
+                             "effects":  [
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Denoise_Bilateral_Mode",
+                                                 "parameters":  {
+                                                                    "intensitySigma":  0.2199999988079071
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Anime4K\\Anime4K_Restore_Soft_UL"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "NNEDI3\\NNEDI3_nns128_win8x4"
+                                             },
+                                             {
+                                                 "name":  "CAS\\CAS",
+                                                 "parameters":  {
+                                                                    "sharpness":  1
+                                                                }
+                                             },
+                                             {
+                                                 "name":  "Lanczos",
+                                                 "scalingType":  0,
+                                                 "scale":  {
+                                                               "x":  2.125,
+                                                               "y":  2.125
+                                                           }
+                                             }
+                                         ]
                          }
                      ],
     "profiles":  [
                      {
-                         "scalingMode":  29,
+                         "scalingMode":  39,
                          "captureMethod":  0,
                          "multiMonitorUsage":  0,
                          "graphicsCard":  -1,

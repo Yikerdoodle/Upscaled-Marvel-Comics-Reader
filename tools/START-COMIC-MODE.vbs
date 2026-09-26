@@ -3,7 +3,7 @@
 ' near the clock as usual; right-click it any time for Settings or Exit.
 '
 ' Before starting Magpie it checks Magpie is on the best laptop settings
-' ("AntiJaggy 8.5x NoSharp", GPU pinned to the GTX 1650, no AI model) and
+' ("AntiJaggy 8.5x NNEDI3x2+CASx2", GPU pinned to the GTX 1650, no AI model) and
 ' quietly fixes anything that isn't - e.g. after using 4K TV mode.
 '
 ' Routine once it's running: put Firefox in FULLSCREEN (F11), click the

@@ -3,7 +3,7 @@
   Runs fully hidden. Before starting Magpie, it makes sure Magpie is set
   up with the best laptop settings, and fixes anything that isn't:
 
-    - Scaling mode "AntiJaggy 8.5x NoSharp" is the active mode, and its
+    - Scaling mode "AntiJaggy 8.5x NNEDI3x2+CASx2" is the active mode, and its
       effect chain matches the reference in magpie-scaling-modes-
       snapshot.json (restored from there if it's missing or was changed).
       The TV launcher switches Magpie to "TV 4K", and nothing used to
@@ -27,7 +27,7 @@
 
 . (Join-Path $PSScriptRoot 'TVModeCommon.ps1')
 
-$ModeName = 'AntiJaggy 8.5x NoSharp'
+$ModeName = 'AntiJaggy 8.5x NNEDI3x2+CASx2'
 $ReferencePath = Join-Path $PSScriptRoot '..\magpie-scaling-modes-snapshot.json'
 $ConfigPath = Join-Path $env:LOCALAPPDATA 'Magpie\config\v2\config.json'
 $MagpieDir = Join-Path $PSScriptRoot '..\Magpie'
