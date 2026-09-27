@@ -7,15 +7,17 @@ Magpie's constraints (from the onnx-preview docs):
   - output size must be a whole-number multiple of the input
 """
 import sys, io, os, torch, onnx
+from pathlib import Path
 # torch prints a U+2705 on success; the Windows console is cp1252 and dies on it.
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 from spandrel import ModelLoader
 from onnxconverter_common import float16
 
-SRC   = r"E:\ComicUpscale\models\2x_APISR_RRDB_GAN_generator.pth"
-OUT32 = r"E:\ComicUpscale\out\2x_APISR_RRDB_fp32.onnx"
-OUT16 = r"E:\ComicUpscale\out\2x_APISR_RRDB_fp16.onnx"
+ROOT  = Path(__file__).resolve().parent
+SRC   = str(ROOT / "models" / "2x_APISR_RRDB_GAN_generator.pth")
+OUT32 = str(ROOT / "out" / "2x_APISR_RRDB_fp32.onnx")
+OUT16 = str(ROOT / "out" / "2x_APISR_RRDB_fp16.onnx")
 
 print("=== loading weights ===")
 desc = ModelLoader().load_from_file(SRC)
