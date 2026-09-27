@@ -1,11 +1,17 @@
 # Marvel Unlimited high-fidelity reading
 
-Everything lives on this drive (E:), including Magpie itself - see
-"Where the live config actually lives" below for the one exception.
+Everything lives in this folder on the E: drive
+(`E:\my GitHub project repos\Upscaled-Marvel-Comics-Reader`), including
+Magpie itself - see "Where the live config actually lives" below for the
+one exception. `C:\Users\Public\Documents\my GitHub project repos` has a
+shortcut to it. The scripts find their files relative to their own
+location, so the folder can be moved or renamed; afterwards re-point the
+desktop shortcuts and re-run `tools\Setup-TVModeElevationTask.ps1` (see
+4K-TV-Setup/README.md).
 
 ## Start reading
 
-    E:\ComicUpscale\tools\START-COMIC-MODE.vbs
+    tools\START-COMIC-MODE.vbs
 
 Double-click it. Nothing visible pops up - no console window, no Magpie
 window, nothing in the taskbar. Magpie's tray icon still appears near the
@@ -99,7 +105,7 @@ turn up.
 
 ## Layout
 
-    E:\ComicUpscale\
+    Upscaled-Marvel-Comics-Reader\
       Magpie\                     the app (onnx-preview2 build)
         effects\                    bundled HLSL shaders (SMAA, Anime4K, ...)
         *.onnx, model.json.*        both currently INACTIVE - see below
