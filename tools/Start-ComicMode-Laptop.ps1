@@ -139,7 +139,7 @@ if ($modelActive -or -not $chainOk -or -not $modeActive -or $hasBom) {
 $startedMagpie = -not (Get-Process Magpie -ErrorAction SilentlyContinue)
 & (Join-Path $PSScriptRoot 'Start-MagpieHidden.ps1')
 if ($startedMagpie -and -not (Wait-MagpieReady -TimeoutSeconds 30)) {
-    Show-LaptopModeWarning "Magpie started but is showing an error instead of running, so nothing will be upscaled. Its log is in E:\ComicUpscale\Magpie\logs\magpie.log."
+    Show-LaptopModeWarning "Magpie started but is showing an error instead of running, so nothing will be upscaled. Its log is in $([System.IO.Path]::GetFullPath((Join-Path $MagpieDir 'logs\magpie.log')))."
 }
 
 $logLine = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') laptop mode: " + $(if ($changes.Count) { "fixed: $($changes -join ', ')" } else { 'all settings already correct' })
