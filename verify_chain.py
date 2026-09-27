@@ -3,7 +3,7 @@ c = json.load(open(r"C:/Users/Work/AppData/Local/Magpie/config/v2/config.json", 
 i = c['profiles'][0]['scalingMode']
 mode = c['scalingModes'][i]
 print("active:", mode['name'])
-base = r"E:\ComicUpscale\Magpie\effects"
+base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Magpie", "effects")
 sep = chr(92)
 total_scale = 1.0
 for e in mode['effects']:
